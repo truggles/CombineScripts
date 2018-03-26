@@ -15,8 +15,23 @@ parser.add_argument(
     dest="fs",
     default="emt",
     help="Which channel to run over? (emt, mmt, ett, mtt, whlep, whhad, wh, zh, eeem, eeet, eemt, eett, emmm, emmt, mmtt, mmmt, llem, llet, llmt, lltt)")
+parser.add_argument(
+    "--fit",
+    action="store",
+    dest="fit",
+    default="postfit",
+    help="Prefit or postfit? choose prefit or postfit")
 args = parser.parse_args()
 fs=args.fs
+fit=args.fit
+assert( fit in ["prefit","postfit"] ), "Choice was not a valid fit argument: %s" % fit
+
+if fit == "prefit" :
+    prepend = "shapes_prefit/"
+    output_dir = "prefit"
+if fit == "postfit" :
+    prepend = "shapes_fit_s/"
+    output_dir = "postfit"
 
 def add_lumi():
     lowX=0.58
@@ -78,61 +93,88 @@ c.cd()
 
 #file=ROOT.TFile("vh_Post.root","r")
 #file=ROOT.TFile("postfit_wh.root","r")
-#file=ROOT.TFile("fitDiagnostics.root","r")
-file=ROOT.TFile("fitDiagnostics_asimov.root","r")
+file=ROOT.TFile("fitDiagnostics.root","r")
+#file=ROOT.TFile("fitDiagnostics_asimov.root","r")
 print file
 
 adapt=ROOT.gROOT.GetColor(12)
 new_idx=ROOT.gROOT.GetListOfColors().GetSize() + 1
 trans=ROOT.TColor(new_idx, adapt.GetRed(), adapt.GetGreen(),adapt.GetBlue(), "",0.5)
 
+wh_channels=["ch9","ch11","ch10","ch12"]
+zh_channels=["ch1","ch5","ch2","ch6","ch3","ch7","ch4","ch8"]
 channels=[]
+set_max = 10
 if fs=="emt":
   channels=["ch9"]
+  cat_text = "e#mu#tau_{h}"
+  set_max = 12
 if fs=="mmt":
   channels=["ch11"]
+  cat_text = "#mu#mu#tau_{h}"
+  set_max = 12
 if fs=="ett":
   channels=["ch10"]
+  cat_text = "e#tau_{h}#tau_{h}"
+  set_max = 12
 if fs=="mtt":
   channels=["ch12"]
+  cat_text = "#mu#tau_{h}#tau_{h}"
+  set_max = 12
 if fs=="eeem":
   channels=["ch1"]
+  cat_text = "ee+e#mu"
+  set_max = 7
 if fs=="eeet":
   channels=["ch2"]
+  cat_text = "ee+e#tau_{h}"
 if fs=="eemt":
   channels=["ch3"]
+  cat_text = "ee+#mu#tau_{h}"
 if fs=="eett":
   channels=["ch4"]
+  cat_text = "ee+#tau_{h}#tau_{h}"
 if fs=="emmm":
   channels=["ch5"]
+  cat_text = "#mu#mu+e#mu"
+  set_max = 7
 if fs=="emmt":
   channels=["ch6"]
+  cat_text = "#mu#mu+e#tau_{h}"
 if fs=="mmmt":
   channels=["ch7"]
+  cat_text = "#mu#mu+#mu#tau_{h}"
 if fs=="mmtt":
   channels=["ch8"]
+  cat_text = "#mu#mu+#tau_{h}#tau_{h}"
 if fs=="llem":
   channels=["ch1","ch5"]
+  cat_text = "ll+e#mu"
 if fs=="llet":
   channels=["ch2","ch6"]
+  cat_text = "ll+e#tau_{h}"
 if fs=="llmt":
   channels=["ch3","ch7"]
+  cat_text = "ll+#mu#tau_{h}"
 if fs=="lltt":
   channels=["ch4","ch8"]
+  cat_text = "ll+#tau_{h}#tau_{h}"
 if fs=="zh":
-  channels=["ch1","ch5","ch2","ch6","ch3","ch7","ch4","ch8"]
+  channels=zh_channels
+  cat_text = "ZH combined"
 if fs=="whlep":
   channels=["ch9","ch11"]
+  cat_text = "WH semi-leptonic"
 if fs=="whhad":
   channels=["ch10","ch12"]
+  cat_text = "WH hadronic"
 if fs=="wh":
-  channels=["ch9","ch11","ch10","ch12"]
+  channels=wh_channels
+  cat_text = "WH combined"
 
 nchan=len(channels)
 print fs
 print channels
-
-prepend = "shapes_fit_s/"
 
 print file.Get(prepend+channels[0])
 print file.Get(prepend+channels[0]).Get("data")
@@ -173,7 +215,7 @@ if file.Get(prepend+channels[0]).Get("ZH_hww125"):
   Rare.Add(file.Get(prepend+channels[0]).Get("ZH_hww125"))
 if file.Get(prepend+channels[0]).Get("ggH_hzz125"):
   Rare.Add(file.Get(prepend+channels[0]).Get("ggH_hzz125"))
-if "ch9" not in prepend+channels[0] and file.Get(prepend+channels[0]).Get("WZ"):
+if channels[0] not in wh_channels and file.Get(prepend+channels[0]).Get("WZ"):
   Rare.Add(file.Get(prepend+channels[0]).Get("WZ"))
 
 for i in range (1,nchan):
@@ -185,7 +227,7 @@ for i in range (1,nchan):
    ZZ.Add(file.Get(prepend+channels[i]).Get("ZZ"))
    if file.Get(prepend+channels[i]).Get("ggZZ"):
      ZZ.Add(file.Get(prepend+channels[i]).Get("ggZZ"))
-   if "ch9" in prepend+channels[i]:
+   if channels[i] in wh_channels :
      WZ.Add(file.Get(prepend+channels[i]).Get("WZ"))
    if file.Get(prepend+channels[i]).Get("DY"): 
      Rare.Add(file.Get(prepend+channels[i]).Get("DY"))
@@ -211,7 +253,7 @@ for i in range (1,nchan):
      Rare.Add(file.Get(prepend+channels[i]).Get("ZH_hww125"))
    if file.Get(prepend+channels[i]).Get("ggH_hzz125"): 
      Rare.Add(file.Get(prepend+channels[i]).Get("ggH_hzz125"))
-   if "ch9" not in prepend+channels[i] and file.Get(prepend+channels[i]).Get("WZ"):
+   if channels[i] not in wh_channels and file.Get(prepend+channels[i]).Get("WZ"):
      Rare.Add(file.Get(prepend+channels[i]).Get("WZ"))
 
    Total.Add(file.Get(prepend+channels[i]).Get("total_background"))
@@ -247,7 +289,7 @@ Data.GetYaxis().SetTitleOffset(1.04)
 Data.SetTitle("")
 Data.GetYaxis().SetTitle("Events/bin")
 
-if "ch9" in channels[0]:
+if channels[0] in wh_channels :
  WZ.SetFillColor(ROOT.TColor.GetColor("#efe7ae"))
 ZZ.SetFillColor(ROOT.TColor.GetColor("#11e7ae"))
 Fake.SetFillColor(ROOT.TColor.GetColor("#a278aa"))
@@ -259,7 +301,7 @@ Data.SetMarkerStyle(20)
 Data.SetLineColor(1)
 Data.SetMarkerSize(1)
 Fake.SetLineColor(1)
-if "ch9" in channels[0]:
+if channels[0] in wh_channels :
   WZ.SetLineColor(1)
 ZZ.SetLineColor(1)
 Rare.SetLineColor(1)
@@ -270,7 +312,7 @@ WH.SetLineColor(9)
 errorBand=Total.Clone()
 
 stack=ROOT.THStack("stack","stack")
-if "ch9" in channels[0]:
+if channels[0] in wh_channels :
   stack.Add(WZ)
 stack.Add(ZZ)
 stack.Add(Rare)
@@ -301,19 +343,25 @@ pad1.SetFrameBorderSize(10)
 
 Data.GetXaxis().SetLabelSize(0)
 
-Data.SetMaximum(max(Data.GetMaximum()*1.35,stack.GetMaximum()*1.35))
+#Data.SetMaximum(max(Data.GetMaximum()*1.35,stack.GetMaximum()*1.35))
+# Blinding
 for k in range(1,Data.GetSize()-1):
      s=WH.GetBinContent(k)+ZH.GetBinContent(k)
      b=ZZ.GetBinContent(k)+Fake.GetBinContent(k)
-     if "ch9" in channels[0]:
+     if channels[0] in wh_channels :
        b=ZZ.GetBinContent(k)+Fake.GetBinContent(k)+WZ.GetBinContent(k)
      if (b<0):
          b=0.000001
      if (0.2*s/(0.00001+0.05*s+b)**0.5 > 0.15):
          Data.SetBinContent(k,-10)
          Data.SetBinError(k,0)
+     # blind ZH on mass peak for high LT always
+     if channels[0] in zh_channels and (k == 15 or k == 16) :
+         Data.SetBinContent(k,-10)
+         Data.SetBinError(k,0)
 Data.SetMinimum(0)
-Data.SetMaximum(1.3*Data.GetMaximum())
+#Data.SetMaximum(1.3*Data.GetMaximum())
+#Data.SetMaximum(max(Data.GetMaximum()*1.35,stack.GetMaximum()*1.35))
 
 Poisson=convert(Data)
 Poisson.GetXaxis().SetTitle("")
@@ -326,14 +374,17 @@ Poisson.GetYaxis().SetTitleSize(0.075)
 Poisson.GetYaxis().SetTitleOffset(1.04)
 Poisson.SetTitle("")
 Poisson.GetYaxis().SetTitle("Events/bin")
-Poisson.SetMaximum(max(Poisson.GetMaximum()*1.45,stack.GetMaximum()*1.45))
+#Poisson.SetMaximum(max(Poisson.GetMaximum()*1.45,stack.GetMaximum()*1.45))
 Poisson.SetMinimum(0)
 Poisson.SetMarkerStyle(20)
 Poisson.SetLineColor(1)
 Poisson.SetMarkerSize(1)
 Poisson.GetXaxis().SetLabelSize(0)
 
-WH.SetMaximum(max(Poisson.GetMaximum()*1.45,stack.GetMaximum()*1.45))
+# Poisson errors are large, make max 10 or greater
+WH.SetMaximum( 
+    max( Poisson.GetMaximum()*2.0, stack.GetMaximum()*2.0,
+    Data.GetMaximum()*2.0,stack.GetMaximum()*2.0, set_max) )
 
 # Check all bins to see if bin yield is zero (this is happening
 # to WH postfit for some reason...) and limit range if so
@@ -360,7 +411,7 @@ Poisson.Draw("P")
 
 legende=make_legend()
 legende.AddEntry(Data,"Observed","elp")
-if "ch9" in channels[0]:
+if channels[0] in wh_channels :
   legende.AddEntry(WZ,"WZ#rightarrow 3l#nu","f")
 legende.AddEntry(ZZ,"ZZ#rightarrow 4l","f")
 legende.AddEntry(Rare,"Rare","f")
@@ -386,36 +437,7 @@ categ.SetTextAlign(   12 )
 categ.SetTextSize ( 0.05 )
 categ.SetTextColor(    1 )
 categ.SetTextFont (   42 )
-if fs=="emt":       
-  categ.AddText("e#mu#tau_{h}")
-if fs=="mmt":     
-  categ.AddText("#mu#mu#tau_{h}")
-if fs=="mtt":     
-  categ.AddText("#mu#tau_{h}#tau_{h}")
-if fs=="ett":     
-  categ.AddText("e#tau_{h}#tau_{h}")
-if fs=="eeem":     
-  categ.AddText("ee+e#mu")
-if fs=="eeet":
-  categ.AddText("ee+e#tau_{h}")
-if fs=="eemt":
-  categ.AddText("ee+#mu#tau_{h}")
-if fs=="eett":
-  categ.AddText("ee+#tau_{h}#tau_{h}")
-if fs=="emmm":
-  categ.AddText("#mu#mu+e#mu")
-if fs=="emmt":
-  categ.AddText("#mu#mu+e#tau_{h}")
-if fs=="mmmt":
-  categ.AddText("#mu#mu+#mu#tau_{h}")
-if fs=="mmtt":
-  categ.AddText("#mu#mu+#tau_{h}#tau_{h}")
-if fs=="whlep":
-  categ.AddText("WH semi-leptonic")
-if fs=="whhad":
-  categ.AddText("WH hadronic")
-if fs=="zh":
-  categ.AddText("ZH combined")
+categ.AddText( cat_text )
 
 categ.Draw()
 
@@ -434,11 +456,11 @@ pad2.Draw()
 pad2.cd()
 h1=Data.Clone()
 hp=Poisson.Clone()
-hp.SetMaximum(2.0)#FIXME(1.5)
-hp.SetMinimum(0.0)#FIXME(0.5)
+#hp.SetMaximum(2.0)#FIXME(1.5)
+#hp.SetMinimum(0.0)#FIXME(0.5)
 hp.SetMarkerStyle(20)
-h1.SetMaximum(2.0)#FIXME(1.5)
-h1.SetMinimum(0.0)#FIXME(0.5)
+#h1.SetMaximum(2.0)#FIXME(1.5)
+#h1.SetMinimum(0.0)#FIXME(0.5)
 h1.SetMarkerStyle(20)
 h3=errorBand.Clone()
 hwoE=errorBand.Clone()
@@ -455,38 +477,36 @@ h1.SetStats(0)
 h1.Divide(hwoE)
 h3.Divide(hwoE)
 h1.GetXaxis().SetTitle("m_{vis} (GeV)")
-if "ch9" not in channels[0]:
+if channels[0] not in wh_channels :
    h1.GetXaxis().SetTitle("m_{#tau#tau} (GeV)")
-h1.GetXaxis().SetLabelSize(0.08)
-h1.GetYaxis().SetLabelSize(0.08)
 h1.GetYaxis().SetTitle("Obs./Exp.")
 h1.GetXaxis().SetNdivisions(505)
 h1.GetYaxis().SetNdivisions(5)
 
-h1.GetXaxis().SetTitleSize(0.15)
-h1.GetYaxis().SetTitleSize(0.15)
-h1.GetYaxis().SetTitleOffset(0.56)
-h1.GetXaxis().SetTitleOffset(1.04)
-h1.GetXaxis().SetLabelSize(0.11)
-h1.GetYaxis().SetLabelSize(0.11)
-h1.GetXaxis().SetTitleFont(42)
-h1.GetYaxis().SetTitleFont(42)
-
 h3.GetXaxis().SetTitle("m_{vis} (GeV)")
-if "ch9" not in channels[0]:
+if channels[0] not in wh_channels :
    h3.GetXaxis().SetTitle("m_{#tau#tau} (GeV)")
-h3.GetXaxis().SetLabelSize(0.08)
-h3.GetYaxis().SetLabelSize(0.08)
 h3.GetYaxis().SetTitle("Obs./Exp.")
 h3.GetXaxis().SetNdivisions(505)
 h3.GetYaxis().SetNdivisions(5)
 h3.SetTitle("")
-h3.GetXaxis().SetTitleSize(0.15)
-h3.GetYaxis().SetTitleSize(0.15)
+h3.GetXaxis().SetTitleSize(0.12)
+h3.GetYaxis().SetTitleSize(0.12)
 h3.GetYaxis().SetTitleOffset(0.56)
-h3.GetXaxis().SetTitleOffset(1.04)
-h3.GetXaxis().SetLabelSize(0.11)
+h3.GetXaxis().SetTitleOffset(1.06)
+h3.GetXaxis().SetLabelSize(0.09)
 h3.GetYaxis().SetLabelSize(0.11)
+for b in range( 1, Data.GetXaxis().GetNbins()+1 ) :
+    if channels[0] in wh_channels :
+        text = "%i - %i" % ( ((b+1) * 10), (b+2) * 10)
+    else : # ZH
+        if b < 11 :
+            text = "%i - %i" % ( ((b) * 20), (( (b+1)) * 20) )
+        else :
+            text = "%i - %i" % ( ((b) * 20)-200, (( (b+1)) * 20)-200 )
+    h3.GetXaxis().SetBinLabel( b, text ) 
+#h3.GetXaxis().SetBit( ROOT.TAxis.kLabelsVert )
+h3.GetXaxis().SetLabelOffset(0.02)
 h3.GetXaxis().SetTitleFont(42)
 h3.GetYaxis().SetTitleFont(42)
 
@@ -506,6 +526,6 @@ pad1.Draw()
 ROOT.gPad.RedrawAxis()
 
 c.Modified()
-c.SaveAs("final/"+fs+"_postfit.pdf")
+c.SaveAs(output_dir+"/"+fs+"_"+fit+".pdf")
 
 
