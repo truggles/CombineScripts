@@ -396,8 +396,8 @@ for b in range(1, Total.GetXaxis().GetNbins()+ 1 ) :
 print "To skip:",emptyBins
 
 if len( emptyBins ) > 0 :
-    WH.GetXaxis().SetRange(1,emptyBins[0])
-    print "Limiting range from bins: %i - %i" % (1, emptyBins[0] )
+    WH.GetXaxis().SetRange(1,emptyBins[0]-1)
+    print "Limiting range from bins: %i - %i" % (1, emptyBins[0]-1 )
 
 #Poisson.Draw("AP")
 #Data.Draw("e0")
@@ -514,8 +514,8 @@ h3.SetMaximum(3.0)#FIXME(1.5)
 h3.SetMinimum(0.0)#FIXME(0.5)
 
 if len( emptyBins ) > 0 :
-    h3.GetXaxis().SetRange(1,emptyBins[0])
-    print "Limiting range from bins: %i - %i" % (1, emptyBins[0] )
+    h3.GetXaxis().SetRange(1,emptyBins[0]-1 )
+    print "Limiting range from bins: %i - %i" % (1, emptyBins[0]-1 )
 
 h3.Draw("e2")
 hp.Draw("P")
