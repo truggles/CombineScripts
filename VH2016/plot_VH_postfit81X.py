@@ -21,9 +21,16 @@ parser.add_argument(
     dest="fit",
     default="postfit",
     help="Prefit or postfit? choose prefit or postfit")
+parser.add_argument(
+    "--unblind",
+    action="store",
+    dest="unblind",
+    default=False,
+    help="Ready to unblind? default is unblind=False, use --unblind=1 to unblind")
 args = parser.parse_args()
 fs=args.fs
 fit=args.fit
+unblind=args.unblind
 assert( fit in ["prefit","postfit"] ), "Choice was not a valid fit argument: %s" % fit
 
 if fit == "prefit" :
@@ -32,6 +39,13 @@ if fit == "prefit" :
 if fit == "postfit" :
     prepend = "shapes_fit_s/"
     output_dir = "postfit"
+
+def print_yields( h, name ) :
+    err = ROOT.Double(0.)
+    #print h.IntegralAndError( 1, h.GetNbinsX() + 1, err )
+    h.IntegralAndError( 1, h.GetNbinsX() + 1, err )
+    #print h.Integral()
+    print "%15s: %.3f \pm %.3f   &" % (name, h.Integral(), err)
 
 def add_lumi():
     lowX=0.58
@@ -79,7 +93,7 @@ def make_legend():
         output.SetLineStyle(0)
         output.SetFillStyle(0)
         output.SetBorderSize(0)
- 	output.SetNColumns(2)
+        output.SetNColumns(2)
         output.SetTextFont(62)
         return output
 
@@ -91,11 +105,8 @@ ROOT.gStyle.SetOptStat(0)
 c=ROOT.TCanvas("canvas","",0,0,600,600)
 c.cd()
 
-#file=ROOT.TFile("vh_Post.root","r")
-#file=ROOT.TFile("postfit_wh.root","r")
 file=ROOT.TFile("fitDiagnostics.root","r")
-#file=ROOT.TFile("fitDiagnostics_asimov.root","r")
-print file
+#print file
 
 adapt=ROOT.gROOT.GetColor(12)
 new_idx=ROOT.gROOT.GetListOfColors().GetSize() + 1
@@ -174,32 +185,31 @@ if fs=="wh":
 
 nchan=len(channels)
 print fs
-print channels
+#print channels
 
-print file.Get(prepend+channels[0])
-print file.Get(prepend+channels[0]).Get("data")
+#print file.Get(prepend+channels[0])
+#print file.Get(prepend+channels[0]).Get("data")
 data_graph=file.Get(prepend+channels[0]).Get("data")
 Data=getTH1FfromTGraphAsymmErrors( data_graph, "data" )
 Data.Sumw2(ROOT.kFALSE)
 Data.SetBinErrorOption(ROOT.TH1.kPoisson)
 #Data=file.Get(prepend+channels[0]).Get("data")
-print Data
+#print Data
 ZZ=file.Get(prepend+channels[0]).Get("ZZ")
 if file.Get(prepend+channels[0]).Get("ggZZ"):
   ZZ.Add(file.Get(prepend+channels[0]).Get("ggZZ"))
 WZ=file.Get(prepend+channels[0]).Get("WZ")
-print file.Get(prepend+channels[0]).Get("WZ"),file.Get(prepend+channels[0]).Get("WZ1")
+#print file.Get(prepend+channels[0]).Get("WZ")
 Rare=file.Get(prepend+channels[0]).Get("ttZ")
 if file.Get(prepend+channels[0]).Get("TT"):
  Rare.Add(file.Get(prepend+channels[0]).Get("TT"))
-Fakes=ZZ.Clone()
 if file.Get(prepend+channels[0]).Get("allFakes"):
   Fake=file.Get(prepend+channels[0]).Get("allFakes")
 if file.Get(prepend+channels[0]).Get("RedBkg"):
   Fake=file.Get(prepend+channels[0]).Get("RedBkg")
 if file.Get(prepend+channels[0]).Get("jetFakes"):
   Fake=file.Get(prepend+channels[0]).Get("jetFakes")
-print prepend+channels[0]
+#print prepend+channels[0]
 WH=file.Get(prepend+channels[0]).Get("WH_htt")
 ZH=file.Get(prepend+channels[0]).Get("ZH_htt")
 Total=file.Get(prepend+channels[0]).Get("total_background")
@@ -215,6 +225,10 @@ if file.Get(prepend+channels[0]).Get("ZH_hww125"):
   Rare.Add(file.Get(prepend+channels[0]).Get("ZH_hww125"))
 if file.Get(prepend+channels[0]).Get("ggH_hzz125"):
   Rare.Add(file.Get(prepend+channels[0]).Get("ggH_hzz125"))
+if file.Get(prepend+channels[0]).Get("ttH_other125"):
+  Rare.Add(file.Get(prepend+channels[0]).Get("ttH_other125"))
+if file.Get(prepend+channels[0]).Get("ttHnonBB"):
+  Rare.Add(file.Get(prepend+channels[0]).Get("ttHnonBB"))
 if channels[0] not in wh_channels and file.Get(prepend+channels[0]).Get("WZ"):
   Rare.Add(file.Get(prepend+channels[0]).Get("WZ"))
 
@@ -253,13 +267,21 @@ for i in range (1,nchan):
      Rare.Add(file.Get(prepend+channels[i]).Get("ZH_hww125"))
    if file.Get(prepend+channels[i]).Get("ggH_hzz125"): 
      Rare.Add(file.Get(prepend+channels[i]).Get("ggH_hzz125"))
+   if file.Get(prepend+channels[0]).Get("ttH_other125"):
+     Rare.Add(file.Get(prepend+channels[0]).Get("ttH_other125"))
+   if file.Get(prepend+channels[0]).Get("ttHnonBB"):
+     Rare.Add(file.Get(prepend+channels[0]).Get("ttHnonBB"))
    if channels[i] not in wh_channels and file.Get(prepend+channels[i]).Get("WZ"):
      Rare.Add(file.Get(prepend+channels[i]).Get("WZ"))
 
    Total.Add(file.Get(prepend+channels[i]).Get("total_background"))
 
-WH.Scale(5)
-ZH.Scale(5)
+#if fit == "prefit" :
+#    WH.Scale(5./6.5 / 2.34)
+#    ZH.Scale(5./6.5 / 2.34)
+#if fit == "postfit" :
+#    WH.Scale(5. / 2.34) # 2.34 is signal str
+#    ZH.Scale(5. / 2.34)
 
 WH.GetXaxis().SetTitle("")
 WH.GetXaxis().SetTitleSize(0)
@@ -318,6 +340,15 @@ stack.Add(ZZ)
 stack.Add(Rare)
 stack.Add(Fake)
 
+print_yields( ZZ, 'ZZ' )
+if channels[0] in wh_channels :
+  print_yields( WZ, 'WZ' )
+print_yields( Rare, 'Rare' )
+print_yields( Fake, 'Fake' )
+print_yields( WH, 'WH' )
+print_yields( ZH, 'ZH' )
+print_yields( Data, 'Data' )
+
 errorBand.SetMarkerSize(0)
 errorBand.SetFillColor(new_idx)
 errorBand.SetFillStyle(3001)
@@ -343,25 +374,23 @@ pad1.SetFrameBorderSize(10)
 
 Data.GetXaxis().SetLabelSize(0)
 
-#Data.SetMaximum(max(Data.GetMaximum()*1.35,stack.GetMaximum()*1.35))
 # Blinding
-for k in range(1,Data.GetSize()-1):
-     s=WH.GetBinContent(k)+ZH.GetBinContent(k)
-     b=ZZ.GetBinContent(k)+Fake.GetBinContent(k)
-     if channels[0] in wh_channels :
-       b=ZZ.GetBinContent(k)+Fake.GetBinContent(k)+WZ.GetBinContent(k)
-     if (b<0):
-         b=0.000001
-     if (0.2*s/(0.00001+0.05*s+b)**0.5 > 0.15):
-         Data.SetBinContent(k,-10)
-         Data.SetBinError(k,0)
-     # blind ZH on mass peak for high LT always
-     if channels[0] in zh_channels and (k == 15 or k == 16) :
-         Data.SetBinContent(k,-10)
-         Data.SetBinError(k,0)
+if not unblind :
+    for k in range(1,Data.GetSize()-1):
+         s=WH.GetBinContent(k)+ZH.GetBinContent(k)
+         b=ZZ.GetBinContent(k)+Fake.GetBinContent(k)
+         if channels[0] in wh_channels :
+           b=ZZ.GetBinContent(k)+Fake.GetBinContent(k)+WZ.GetBinContent(k)
+         if (b<0):
+             b=0.000001
+         if (0.2*s/(0.00001+0.05*s+b)**0.5 > 0.15):
+             Data.SetBinContent(k,-10)
+             Data.SetBinError(k,0)
+         # blind ZH on mass peak for high LT always
+         if channels[0] in zh_channels and (k == 15 or k == 16) :
+             Data.SetBinContent(k,-10)
+             Data.SetBinError(k,0)
 Data.SetMinimum(0)
-#Data.SetMaximum(1.3*Data.GetMaximum())
-#Data.SetMaximum(max(Data.GetMaximum()*1.35,stack.GetMaximum()*1.35))
 
 Poisson=convert(Data)
 Poisson.GetXaxis().SetTitle("")
@@ -374,7 +403,6 @@ Poisson.GetYaxis().SetTitleSize(0.075)
 Poisson.GetYaxis().SetTitleOffset(1.04)
 Poisson.SetTitle("")
 Poisson.GetYaxis().SetTitle("Events/bin")
-#Poisson.SetMaximum(max(Poisson.GetMaximum()*1.45,stack.GetMaximum()*1.45))
 Poisson.SetMinimum(0)
 Poisson.SetMarkerStyle(20)
 Poisson.SetLineColor(1)
@@ -466,10 +494,10 @@ h3=errorBand.Clone()
 hwoE=errorBand.Clone()
 p_x=hp.GetX()
 p_y=hp.GetY()
-print p_x[0],p_x[1],hwoE.GetBinContent(1)
+#print p_x[0],p_x[1],hwoE.GetBinContent(1)
 for iii in range (0,hwoE.GetSize()-2):
   hwoE.SetBinError(iii+1,0)
-  print iii,p_x[iii],p_y[iii],p_y[iii]/max(hwoE.GetBinContent(iii+1),1e-5),h3.GetBinContent(iii+1)
+  #print iii,p_x[iii],p_y[iii],p_y[iii]/max(hwoE.GetBinContent(iii+1),1e-5),h3.GetBinContent(iii+1)
   hp.SetPoint(iii,p_x[iii],p_y[iii]/max(hwoE.GetBinContent(iii+1),1e-5))
   hp.SetPointEYhigh(iii,hp.GetErrorYhigh(iii)/max(hwoE.GetBinContent(iii+1),1e-5))
   hp.SetPointEYlow(iii,hp.GetErrorYlow(iii)/max(hwoE.GetBinContent(iii+1),1e-5))
