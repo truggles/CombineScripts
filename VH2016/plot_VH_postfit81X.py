@@ -88,10 +88,12 @@ def add_Preliminary():
 
 def make_legend():
         #output = ROOT.TLegend(0.70, 0.40, 0.92, 0.84, "", "brNDC")
-        output = ROOT.TLegend(0.45, 0.60, 0.95, 0.84, "", "brNDC")
+        output = ROOT.TLegend(0.43, 0.60, 0.93, 0.84, "", "brNDC")
         output.SetLineWidth(0)
         output.SetLineStyle(0)
-        output.SetFillStyle(0)
+        #output.SetFillStyle(0)
+        output.SetFillStyle(1001)
+        output.SetFillColor(ROOT.kWhite)
         output.SetBorderSize(0)
         output.SetNColumns(2)
         output.SetTextFont(62)
@@ -105,7 +107,7 @@ ROOT.gStyle.SetOptStat(0)
 c=ROOT.TCanvas("canvas","",0,0,600,600)
 c.cd()
 
-file=ROOT.TFile("fitDiagnostics.root","r")
+file=ROOT.TFile("official_plotted_fitDiagnostics.root","r")
 #print file
 
 adapt=ROOT.gROOT.GetColor(12)
@@ -119,11 +121,11 @@ set_max = 10
 if fs=="emt":
   channels=["ch9"]
   cat_text = "e#mu#tau_{h}"
-  set_max = 12
+  set_max = 16
 if fs=="mmt":
   channels=["ch11"]
   cat_text = "#mu#mu#tau_{h}"
-  set_max = 12
+  set_max = 24
 if fs=="ett":
   channels=["ch10"]
   cat_text = "e#tau_{h}#tau_{h}"
@@ -131,54 +133,68 @@ if fs=="ett":
 if fs=="mtt":
   channels=["ch12"]
   cat_text = "#mu#tau_{h}#tau_{h}"
-  set_max = 12
+  set_max = 14
 if fs=="eeem":
   channels=["ch1"]
   cat_text = "ee+e#mu"
   set_max = 7
+  lt_num = 50
 if fs=="eeet":
   channels=["ch2"]
   cat_text = "ee+e#tau_{h}"
+  lt_num = 60
 if fs=="eemt":
   channels=["ch3"]
   cat_text = "ee+#mu#tau_{h}"
+  lt_num = 60
 if fs=="eett":
   channels=["ch4"]
   cat_text = "ee+#tau_{h}#tau_{h}"
+  lt_num = 75
 if fs=="emmm":
   channels=["ch5"]
   cat_text = "#mu#mu+e#mu"
   set_max = 7
+  lt_num = 50
 if fs=="emmt":
   channels=["ch6"]
   cat_text = "#mu#mu+e#tau_{h}"
+  lt_num = 60
 if fs=="mmmt":
   channels=["ch7"]
   cat_text = "#mu#mu+#mu#tau_{h}"
+  lt_num = 60
 if fs=="mmtt":
   channels=["ch8"]
   cat_text = "#mu#mu+#tau_{h}#tau_{h}"
+  lt_num = 75
 if fs=="llem":
   channels=["ch1","ch5"]
   cat_text = "ll+e#mu"
+  lt_num = 50
 if fs=="llet":
   channels=["ch2","ch6"]
   cat_text = "ll+e#tau_{h}"
+  lt_num = 60
 if fs=="llmt":
   channels=["ch3","ch7"]
   cat_text = "ll+#mu#tau_{h}"
+  lt_num = 60
 if fs=="lltt":
   channels=["ch4","ch8"]
   cat_text = "ll+#tau_{h}#tau_{h}"
+  lt_num = 75
 if fs=="zh":
   channels=zh_channels
   cat_text = "ZH combined"
+  lt_num = ""
 if fs=="whlep":
   channels=["ch9","ch11"]
-  cat_text = "WH semi-leptonic"
+  cat_text = "WH semileptonic"
 if fs=="whhad":
   channels=["ch10","ch12"]
   cat_text = "WH hadronic"
+  set_max = 20
 if fs=="wh":
   channels=wh_channels
   cat_text = "WH combined"
@@ -212,7 +228,13 @@ if file.Get(prepend+channels[0]).Get("jetFakes"):
 #print prepend+channels[0]
 WH=file.Get(prepend+channels[0]).Get("WH_htt")
 ZH=file.Get(prepend+channels[0]).Get("ZH_htt")
+VH=file.Get(prepend+channels[0]).Get("WH_htt").Clone()
+VH.Add(file.Get(prepend+channels[0]).Get("ZH_htt").Clone())
+VHfill=file.Get(prepend+channels[0]).Get("WH_htt").Clone()
+VHfill.Add(file.Get(prepend+channels[0]).Get("ZH_htt").Clone())
+#Total=file.Get(prepend+channels[0]).Get("total_background")
 Total=file.Get(prepend+channels[0]).Get("total_background")
+TotalAll=file.Get(prepend+channels[0]).Get("total")
 if file.Get(prepend+channels[0]).Get("DY"):
   Rare.Add(file.Get(prepend+channels[0]).Get("DY"))
 if file.Get(prepend+channels[0]).Get("ttW"): 
@@ -255,6 +277,10 @@ for i in range (1,nchan):
      Fake.Add(file.Get(prepend+channels[i]).Get("jetFakes"))
    WH.Add(file.Get(prepend+channels[i]).Get("WH_htt"))
    ZH.Add(file.Get(prepend+channels[i]).Get("ZH_htt"))
+   VH.Add(file.Get(prepend+channels[i]).Get("WH_htt").Clone())
+   VH.Add(file.Get(prepend+channels[i]).Get("ZH_htt").Clone())
+   VHfill.Add(file.Get(prepend+channels[i]).Get("WH_htt").Clone())
+   VHfill.Add(file.Get(prepend+channels[i]).Get("ZH_htt").Clone())
    if file.Get(prepend+channels[i]).Get("ttZ"):
      Rare.Add(file.Get(prepend+channels[i]).Get("ttZ"))
    if file.Get(prepend+channels[i]).Get("ttW"):
@@ -275,6 +301,7 @@ for i in range (1,nchan):
      Rare.Add(file.Get(prepend+channels[i]).Get("WZ"))
 
    Total.Add(file.Get(prepend+channels[i]).Get("total_background"))
+   TotalAll.Add(file.Get(prepend+channels[i]).Get("total"))
 
 #if fit == "prefit" :
 #    WH.Scale(5./6.5 / 2.34)
@@ -298,6 +325,21 @@ WH.SetMarkerStyle(20)
 WH.SetMarkerSize(1)
 WH.GetXaxis().SetLabelSize(0)
 
+VH.GetXaxis().SetTitle("")
+VH.GetXaxis().SetTitleSize(0)
+VH.GetXaxis().SetNdivisions(505)
+VH.GetYaxis().SetLabelFont(42)
+VH.GetYaxis().SetLabelOffset(0.01)
+VH.GetYaxis().SetLabelSize(0.06)
+VH.GetYaxis().SetTitleSize(0.075)
+VH.GetYaxis().SetTitleOffset(1.04)
+VH.SetTitle("")
+VH.GetYaxis().SetTitle("Events/bin")
+VH.SetMinimum(0)
+VH.SetMarkerStyle(20)
+VH.SetMarkerSize(1)
+VH.GetXaxis().SetLabelSize(0)
+
 Data.Sumw2(ROOT.kFALSE)
 Data.SetBinErrorOption(ROOT.TH1.kPoisson)
 Data.GetXaxis().SetTitle("")
@@ -316,8 +358,11 @@ if channels[0] in wh_channels :
 ZZ.SetFillColor(ROOT.TColor.GetColor("#11e7ae"))
 Fake.SetFillColor(ROOT.TColor.GetColor("#a278aa"))
 Rare.SetFillColor(ROOT.TColor.GetColor("#3e125f"))
+VHfill.SetFillColor(ROOT.kRed)
 WH.SetLineWidth(4)
 ZH.SetLineWidth(4)
+VH.SetLineWidth(4)
+#VHfill = VH.Clone()
 
 Data.SetMarkerStyle(20)
 Data.SetLineColor(1)
@@ -327,27 +372,43 @@ if channels[0] in wh_channels :
   WZ.SetLineColor(1)
 ZZ.SetLineColor(1)
 Rare.SetLineColor(1)
+VHfill.SetLineColor(1)
 Total.SetLineColor(1)
 ZH.SetLineColor(2)
 WH.SetLineColor(9)
+VH.SetLineColor(ROOT.kRed)
 
-errorBand=Total.Clone()
+errorBand=TotalAll.Clone()
+for b in range( 1, errorBand.GetNbinsX()+1 ) :
+    errorBand.SetBinError( b, Total.GetBinError( b ) )
 
 stack=ROOT.THStack("stack","stack")
+stack.Add(Fake)
+stack.Add(Rare)
+stack.Add(ZZ)
 if channels[0] in wh_channels :
   stack.Add(WZ)
-stack.Add(ZZ)
-stack.Add(Rare)
-stack.Add(Fake)
+stack.Add(VHfill)
 
+#print "ZZ: %.2f" % ZZ.Integral()
 print_yields( ZZ, 'ZZ' )
 if channels[0] in wh_channels :
+  #print "WZ: %.2f" % WZ.Integral()
   print_yields( WZ, 'WZ' )
 print_yields( Rare, 'Rare' )
 print_yields( Fake, 'Fake' )
 print_yields( WH, 'WH' )
 print_yields( ZH, 'ZH' )
+print_yields( VH, 'VH' )
 print_yields( Data, 'Data' )
+
+print "WH / VH = %.4f" % (( WH.Integral() / VH.Integral() ) * 100.)
+print "ZH / VH = %.4f" % (( ZH.Integral() / VH.Integral() ) * 100.)
+#print "Rare: %.2f" % Rare.Integral()
+#print "Fake: %.2f" % Fake.Integral()
+#print "WH: %.2f" % WH.Integral()
+#print "ZH: %.2f" % ZH.Integral()
+#print "Data: %.2f" % Data.Integral()
 
 errorBand.SetMarkerSize(0)
 errorBand.SetFillColor(new_idx)
@@ -410,7 +471,8 @@ Poisson.SetMarkerSize(1)
 Poisson.GetXaxis().SetLabelSize(0)
 
 # Poisson errors are large, make max 10 or greater
-WH.SetMaximum( 
+#WH.SetMaximum( 
+VH.SetMaximum( 
     max( Poisson.GetMaximum()*2.0, stack.GetMaximum()*2.0,
     Data.GetMaximum()*2.0,stack.GetMaximum()*2.0, set_max) )
 
@@ -424,18 +486,30 @@ for b in range(1, Total.GetXaxis().GetNbins()+ 1 ) :
 print "To skip:",emptyBins
 
 if len( emptyBins ) > 0 :
-    WH.GetXaxis().SetRange(1,emptyBins[0]-1)
+    #WH.GetXaxis().SetRange(1,emptyBins[0]-1)
+    VH.GetXaxis().SetRange(1,emptyBins[0]-1)
     print "Limiting range from bins: %i - %i" % (1, emptyBins[0]-1 )
 
 #Poisson.Draw("AP")
 #Data.Draw("e0")
-WH.Draw("hist")
+#WH.Draw("hist")
+VH.Draw("hist")
 stack.Draw("histsame")
 errorBand.Draw("e2same")
-WH.Draw("histsame")
-ZH.Draw("histsame")
+#WH.Draw("histsame")
+#ZH.Draw("histsame")
+VH.Draw("histsame")
 #Data.Draw("e0same")
 Poisson.Draw("P")
+
+### TLine
+zh_center = VH.GetXaxis().GetNbins() / 2
+if channels[0] not in wh_channels :
+    line = ROOT.TLine( zh_center, 0, zh_center, VH.GetMaximum() )
+    line.SetLineColor( ROOT.kBlack )
+    line.SetLineStyle( 2 )
+    line.SetLineWidth( 2 )
+    line.Draw()
 
 legende=make_legend()
 legende.AddEntry(Data,"Observed","elp")
@@ -444,10 +518,14 @@ if channels[0] in wh_channels :
 legende.AddEntry(ZZ,"ZZ#rightarrow 4l","f")
 legende.AddEntry(Rare,"Rare","f")
 legende.AddEntry(Fake,"Reducible","f")
-legende.AddEntry(WH,"WH, H#rightarrow#tau#tau (x5)","l")
-legende.AddEntry(ZH,"ZH, H#rightarrow#tau#tau (x5)","l")
+legende.AddEntry(VHfill,"VH, H#rightarrow#tau#tau (#mu=2.5)","f")
+#legende.AddEntry(WH,"WH, H#rightarrow#tau#tau (#mu=2.5)","l")
+#legende.AddEntry(ZH,"ZH, H#rightarrow#tau#tau (#mu=2.5)","l")
+legende.AddEntry(VH,"VH, H#rightarrow#tau#tau (#mu=2.5)","l")
 legende.AddEntry(errorBand,"Uncertainty","f")
 legende.Draw()
+# To make sure it is on top!
+Poisson.Draw("P")
 
 l1=add_lumi()
 l1.Draw("same")
@@ -468,6 +546,35 @@ categ.SetTextFont (   42 )
 categ.AddText( cat_text )
 
 categ.Draw()
+
+# For ZH LT Regions
+if channels[0] not in wh_channels :
+
+    lt_txt_low = "L_{T}^{Higgs} < %s" % lt_num
+    lt_txt_high = "L_{T}^{Higgs} > %s" % lt_num
+    if fs=="zh":
+        lt_txt_low = "Low L_{T}^{Higgs}"
+        lt_txt_high = "High L_{T}^{Higgs}"
+
+    lt_1  = ROOT.TPaveText(0.42, 0.5, 0.57, 0.60, "NDC")
+    lt_1.SetBorderSize(   0 )
+    lt_1.SetFillStyle(    0 )
+    lt_1.SetTextAlign(   12 )
+    lt_1.SetTextSize ( 0.04 )
+    lt_1.SetTextColor(    1 )
+    lt_1.SetTextFont (   42 )
+    lt_1.AddText( lt_txt_low )
+    lt_1.Draw()
+
+    lt_2  = ROOT.TPaveText(0.57, 0.5, 0.71, 0.60, "NDC")
+    lt_2.SetBorderSize(   0 )
+    lt_2.SetFillStyle(    0 )
+    lt_2.SetTextAlign(   12 )
+    lt_2.SetTextSize ( 0.04 )
+    lt_2.SetTextColor(    1 )
+    lt_2.SetTextFont (   42 )
+    lt_2.AddText( lt_txt_high )
+    lt_2.Draw()
 
 c.cd()
 pad2 = ROOT.TPad("pad2","pad2",0,0,1,0.35);
@@ -507,14 +614,14 @@ h3.Divide(hwoE)
 h1.GetXaxis().SetTitle("m_{vis} (GeV)")
 if channels[0] not in wh_channels :
    h1.GetXaxis().SetTitle("m_{#tau#tau} (GeV)")
-h1.GetYaxis().SetTitle("Obs./Exp.")
+h1.GetYaxis().SetTitle("Obs./(Bkg. + Sig.)")
 h1.GetXaxis().SetNdivisions(505)
 h1.GetYaxis().SetNdivisions(5)
 
 h3.GetXaxis().SetTitle("m_{vis} (GeV)")
 if channels[0] not in wh_channels :
    h3.GetXaxis().SetTitle("m_{#tau#tau} (GeV)")
-h3.GetYaxis().SetTitle("Obs./Exp.")
+h3.GetYaxis().SetTitle("Obs./(Bkg. + Sig.)")
 h3.GetXaxis().SetNdivisions(505)
 h3.GetYaxis().SetNdivisions(5)
 h3.SetTitle("")
@@ -538,15 +645,24 @@ h3.GetXaxis().SetLabelOffset(0.02)
 h3.GetXaxis().SetTitleFont(42)
 h3.GetYaxis().SetTitleFont(42)
 
-h3.SetMaximum(3.0)#FIXME(1.5)
-h3.SetMinimum(0.0)#FIXME(0.5)
+mini = 0.0
+maxi = 3.0
+h3.SetMaximum(maxi)#FIXME(1.5)
+h3.SetMinimum(mini)#FIXME(0.5)
 
 if len( emptyBins ) > 0 :
     h3.GetXaxis().SetRange(1,emptyBins[0]-1 )
     print "Limiting range from bins: %i - %i" % (1, emptyBins[0]-1 )
 
 h3.Draw("e2")
+if channels[0] not in wh_channels :
+    line2 = ROOT.TLine( zh_center, mini, zh_center, maxi )
+    line2.SetLineColor( ROOT.kBlack )
+    line2.SetLineStyle( 2 )
+    line2.SetLineWidth( 2 )
+    line2.Draw()
 hp.Draw("P")
+
 
 c.cd()
 pad1.Draw()
@@ -554,6 +670,6 @@ pad1.Draw()
 ROOT.gPad.RedrawAxis()
 
 c.Modified()
-c.SaveAs(output_dir+"/"+fs+"_"+fit+".pdf")
+c.SaveAs(output_dir+"/"+fs+"_"+fit+".png")
 
 
