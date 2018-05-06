@@ -1,0 +1,5 @@
+
+
+Updated signal_nom.C to match closer to the style of the mu plots from HIG-16-043 paper version. I did not update the kGreen color to match HIG-16-043. This is because I kept the kGreen+1 to match with the Brazilian flag limits kGreen+1.
+
+
