@@ -319,7 +319,10 @@ WH.GetYaxis().SetLabelSize(0.06)
 WH.GetYaxis().SetTitleSize(0.075)
 WH.GetYaxis().SetTitleOffset(1.04)
 WH.SetTitle("")
-WH.GetYaxis().SetTitle("Events/bin")
+if channels[0] in wh_channels :
+    WH.GetYaxis().SetTitle("Events / 10 GeV")
+else :
+    WH.GetYaxis().SetTitle("Events / 20 GeV")
 WH.SetMinimum(0)
 WH.SetMarkerStyle(20)
 WH.SetMarkerSize(1)
@@ -334,7 +337,10 @@ VH.GetYaxis().SetLabelSize(0.06)
 VH.GetYaxis().SetTitleSize(0.075)
 VH.GetYaxis().SetTitleOffset(1.04)
 VH.SetTitle("")
-VH.GetYaxis().SetTitle("Events/bin")
+if channels[0] in wh_channels :
+    VH.GetYaxis().SetTitle("Events / 10 GeV")
+else :
+    VH.GetYaxis().SetTitle("Events / 20 GeV")
 VH.SetMinimum(0)
 VH.SetMarkerStyle(20)
 VH.SetMarkerSize(1)
@@ -628,18 +634,18 @@ h3.SetTitle("")
 h3.GetXaxis().SetTitleSize(0.12)
 h3.GetYaxis().SetTitleSize(0.12)
 h3.GetYaxis().SetTitleOffset(0.56)
-h3.GetXaxis().SetTitleOffset(1.06)
+h3.GetXaxis().SetTitleOffset(1.25)
 h3.GetXaxis().SetLabelSize(0.09)
 h3.GetYaxis().SetLabelSize(0.11)
-for b in range( 1, Data.GetXaxis().GetNbins()+1 ) :
-    if channels[0] in wh_channels :
-        text = "%i - %i" % ( ((b+1) * 10), (b+2) * 10)
-    else : # ZH
-        if b < 11 :
-            text = "%i - %i" % ( ((b) * 20), (( (b+1)) * 20) )
-        else :
-            text = "%i - %i" % ( ((b) * 20)-200, (( (b+1)) * 20)-200 )
-    h3.GetXaxis().SetBinLabel( b, text ) 
+#for b in range( 1, Data.GetXaxis().GetNbins()+1 ) :
+#    if channels[0] in wh_channels :
+#        text = "%i - %i" % ( ((b+1) * 10), (b+2) * 10)
+#    else : # ZH
+#        if b < 11 :
+#            text = "%i - %i" % ( ((b) * 20), (( (b+1)) * 20) )
+#        else :
+#            text = "%i - %i" % ( ((b) * 20)-200, (( (b+1)) * 20)-200 )
+#    h3.GetXaxis().SetBinLabel( b, text ) 
 #h3.GetXaxis().SetBit( ROOT.TAxis.kLabelsVert )
 h3.GetXaxis().SetLabelOffset(0.02)
 h3.GetXaxis().SetTitleFont(42)
@@ -653,6 +659,30 @@ h3.SetMinimum(mini)#FIXME(0.5)
 if len( emptyBins ) > 0 :
     h3.GetXaxis().SetRange(1,emptyBins[0]-1 )
     print "Limiting range from bins: %i - %i" % (1, emptyBins[0]-1 )
+
+h3.Draw("e2")
+print h3.GetXaxis().GetLabelOffset()
+h3.GetXaxis().SetLabelOffset( h3.GetXaxis().GetLabelOffset() * 2 )
+ROOT.gPad.SetGridx(0)
+#h3.GetXaxis().ChangeLabel(-1,-1,-1,-1,-1,-1,"-#pi")
+if fs in ["emt", "ett", "mmt", "mtt","whhad","whlep","wh"] :
+    if fs in ["ett", "mtt", "whhad", "wh"] : # had
+        h3.GetXaxis().SetNdivisions(12, ROOT.kFALSE)
+        for j in range( 1, 14 ) :
+            h3.GetXaxis().ChangeLabel(j,45,-1,-1,-1,-1,"%s" % (j*10 + 10))
+    else : # semilep
+        h3.GetXaxis().SetNdivisions(11, ROOT.kFALSE)
+        for j in range( 1, 13 ) :
+            h3.GetXaxis().ChangeLabel(j,45,-1,-1,-1,-1,"%s" % (j*10 + 10))
+else : # is ZH
+    h3.GetXaxis().SetNdivisions(20, ROOT.kFALSE)
+    for j in range( 1, 22 ) :
+        if j < 11 :
+            h3.GetXaxis().ChangeLabel(j,45,-1,-1,-1,-1,"%s" % (j*20))
+        elif j == 11 :
+            h3.GetXaxis().ChangeLabel(j,45,.07,-1,-1,-1,"220/20")
+        else :
+            h3.GetXaxis().ChangeLabel(j,45,-1,-1,-1,-1,"%s" % ((j-10)*20))
 
 h3.Draw("e2")
 if channels[0] not in wh_channels :
@@ -671,5 +701,6 @@ ROOT.gPad.RedrawAxis()
 
 c.Modified()
 c.SaveAs(output_dir+"/"+fs+"_"+fit+".png")
+c.SaveAs(output_dir+"/"+fs+"_"+fit+".pdf")
 
 
