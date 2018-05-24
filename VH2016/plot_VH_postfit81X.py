@@ -39,6 +39,7 @@ if fit == "prefit" :
 if fit == "postfit" :
     prepend = "shapes_fit_s/"
     output_dir = "postfit"
+output_dir = "/afs/cern.ch/user/t/truggles/www/post-fit/"+output_dir
 
 def print_yields( h, name ) :
     err = ROOT.Double(0.)
@@ -78,7 +79,7 @@ def add_Preliminary():
     lowY=0.63
     lumi  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.15, lowY+0.16, "NDC")
     lumi.SetTextFont(52)
-    lumi.SetTextSize(0.06)
+    lumi.SetTextSize(0.05)
     lumi.SetBorderSize(   0 )
     lumi.SetFillStyle(    0 )
     lumi.SetTextAlign(   12 )
@@ -88,7 +89,7 @@ def add_Preliminary():
 
 def make_legend():
         #output = ROOT.TLegend(0.70, 0.40, 0.92, 0.84, "", "brNDC")
-        output = ROOT.TLegend(0.43, 0.60, 0.93, 0.84, "", "brNDC")
+        output = ROOT.TLegend(0.43, 0.55, 0.93, 0.84, "", "brNDC")
         output.SetLineWidth(0)
         output.SetLineStyle(0)
         #output.SetFillStyle(0)
@@ -121,11 +122,11 @@ set_max = 10
 if fs=="emt":
   channels=["ch9"]
   cat_text = "e#mu#tau_{h}"
-  set_max = 16
+  set_max = 17
 if fs=="mmt":
   channels=["ch11"]
   cat_text = "#mu#mu#tau_{h}"
-  set_max = 24
+  set_max = 25
 if fs=="ett":
   channels=["ch10"]
   cat_text = "e#tau_{h}#tau_{h}"
@@ -133,7 +134,7 @@ if fs=="ett":
 if fs=="mtt":
   channels=["ch12"]
   cat_text = "#mu#tau_{h}#tau_{h}"
-  set_max = 14
+  set_max = 16
 if fs=="eeem":
   channels=["ch1"]
   cat_text = "ee+e#mu"
@@ -147,6 +148,7 @@ if fs=="eemt":
   channels=["ch3"]
   cat_text = "ee+#mu#tau_{h}"
   lt_num = 60
+  set_max = 15
 if fs=="eett":
   channels=["ch4"]
   cat_text = "ee+#tau_{h}#tau_{h}"
@@ -176,6 +178,7 @@ if fs=="llet":
   channels=["ch2","ch6"]
   cat_text = "ll+e#tau_{h}"
   lt_num = 60
+  set_max = 16
 if fs=="llmt":
   channels=["ch3","ch7"]
   cat_text = "ll+#mu#tau_{h}"
@@ -191,13 +194,15 @@ if fs=="zh":
 if fs=="whlep":
   channels=["ch9","ch11"]
   cat_text = "WH semileptonic"
+  set_max = 40
 if fs=="whhad":
   channels=["ch10","ch12"]
   cat_text = "WH hadronic"
-  set_max = 20
+  set_max = 22
 if fs=="wh":
   channels=wh_channels
   cat_text = "WH combined"
+  set_max = 55
 
 nchan=len(channels)
 print fs
@@ -419,7 +424,7 @@ print "ZH / VH = %.4f" % (( ZH.Integral() / VH.Integral() ) * 100.)
 errorBand.SetMarkerSize(0)
 errorBand.SetFillColor(new_idx)
 errorBand.SetFillStyle(3001)
-errorBand.SetLineWidth(1)
+errorBand.SetLineWidth(0)
 
 pad1 = ROOT.TPad("pad1","pad1",0,0.35,1,1)
 pad1.Draw()
@@ -486,7 +491,7 @@ VH.SetMaximum(
 # to WH postfit for some reason...) and limit range if so
 emptyBins = []
 for b in range(1, Total.GetXaxis().GetNbins()+ 1 ) :
-    if Total.GetBinContent(b) == 0 and Data.GetBinContent(b) == 0 :
+    if Total.GetBinContent(b) == 0 and Data.GetBinContent(b) <= 0 :
         print "both equal zero. skip bin",b
         emptyBins.append( b )
 print "To skip:",emptyBins
@@ -506,7 +511,7 @@ errorBand.Draw("e2same")
 #ZH.Draw("histsame")
 VH.Draw("histsame")
 #Data.Draw("e0same")
-Poisson.Draw("P")
+Poisson.Draw("P 0")
 
 ### TLine
 zh_center = VH.GetXaxis().GetNbins() / 2
@@ -531,7 +536,7 @@ legende.AddEntry(VH,"VH, H#rightarrow#tau#tau (#mu=2.5)","l")
 legende.AddEntry(errorBand,"Uncertainty","f")
 legende.Draw()
 # To make sure it is on top!
-Poisson.Draw("P")
+Poisson.Draw("P 0")
 
 l1=add_lumi()
 l1.Draw("same")
@@ -562,21 +567,23 @@ if channels[0] not in wh_channels :
         lt_txt_low = "Low L_{T}^{Higgs}"
         lt_txt_high = "High L_{T}^{Higgs}"
 
-    lt_1  = ROOT.TPaveText(0.42, 0.5, 0.57, 0.60, "NDC")
+    #lt_1  = ROOT.TPaveText(0.415, 0.5, 0.57, 0.60, "NDC")
+    lt_1  = ROOT.TPaveText(0.415, 0.45, 0.57, 0.55, "NDC")
     lt_1.SetBorderSize(   0 )
     lt_1.SetFillStyle(    0 )
     lt_1.SetTextAlign(   12 )
-    lt_1.SetTextSize ( 0.04 )
+    lt_1.SetTextSize ( 0.0475 )
     lt_1.SetTextColor(    1 )
     lt_1.SetTextFont (   42 )
     lt_1.AddText( lt_txt_low )
     lt_1.Draw()
 
-    lt_2  = ROOT.TPaveText(0.57, 0.5, 0.71, 0.60, "NDC")
+    #lt_2  = ROOT.TPaveText(0.5625, 0.5, 0.71, 0.60, "NDC")
+    lt_2  = ROOT.TPaveText(0.5625, 0.45, 0.71, 0.55, "NDC")
     lt_2.SetBorderSize(   0 )
     lt_2.SetFillStyle(    0 )
     lt_2.SetTextAlign(   12 )
-    lt_2.SetTextSize ( 0.04 )
+    lt_2.SetTextSize ( 0.0475 )
     lt_2.SetTextColor(    1 )
     lt_2.SetTextFont (   42 )
     lt_2.AddText( lt_txt_high )
@@ -607,13 +614,31 @@ h3=errorBand.Clone()
 hwoE=errorBand.Clone()
 p_x=hp.GetX()
 p_y=hp.GetY()
+
+# If an empty data bin was set to negative for plotting purposes,
+# reset it to zero for ration plot.
+x_val = ROOT.Double(0.)
+y_val = ROOT.Double(0.)
+for iii in range( len(p_x) ) :
+  if y_val < 0. :
+    hp.SetPoint( iii, x_val, 0. )
+    
+
 #print p_x[0],p_x[1],hwoE.GetBinContent(1)
 for iii in range (0,hwoE.GetSize()-2):
   hwoE.SetBinError(iii+1,0)
   #print iii,p_x[iii],p_y[iii],p_y[iii]/max(hwoE.GetBinContent(iii+1),1e-5),h3.GetBinContent(iii+1)
-  hp.SetPoint(iii,p_x[iii],p_y[iii]/max(hwoE.GetBinContent(iii+1),1e-5))
+  #print iii, hp.GetErrorYhigh(iii), hwoE.GetBinContent(iii+1),  hp.GetErrorYlow(iii), hwoE.GetBinContent(iii+1)
+  #print iii, p_y[iii], hwoE.GetBinContent(iii+1)
+
+  # Make sure it goes off the bottom of the ratio plot!!!
+  if p_y[iii] < 0. :
+    hp.SetPoint(iii,p_x[iii],-0.03)
+    hp.SetPointEYlow(iii,-0.03)
+  else :
+    hp.SetPoint(iii,p_x[iii],p_y[iii]/max(hwoE.GetBinContent(iii+1),1e-5))
+    hp.SetPointEYlow(iii,hp.GetErrorYlow(iii)/max(hwoE.GetBinContent(iii+1),1e-5))
   hp.SetPointEYhigh(iii,hp.GetErrorYhigh(iii)/max(hwoE.GetBinContent(iii+1),1e-5))
-  hp.SetPointEYlow(iii,hp.GetErrorYlow(iii)/max(hwoE.GetBinContent(iii+1),1e-5))
 h1.SetStats(0)
 h1.Divide(hwoE)
 h3.Divide(hwoE)
@@ -691,7 +716,7 @@ if channels[0] not in wh_channels :
     line2.SetLineStyle( 2 )
     line2.SetLineWidth( 2 )
     line2.Draw()
-hp.Draw("P")
+hp.Draw("P 0")
 
 
 c.cd()

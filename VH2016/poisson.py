@@ -35,6 +35,10 @@ def convert(histogram):
         yield_in_bin = output.GetY()[i]
     	if yield_in_bin<0:
     	    yield_in_bin=0
+        # Next check the case where we set the bin to -0.000001 
+        # to smooth out draw options, the Gamma function fails for non-integers 
+    	if yield_in_bin<1 and yield_in_bin>0 :
+    	    yield_in_bin=1
         N=int(yield_in_bin)
 
         L, U = poisson_errors(N)
@@ -77,7 +81,13 @@ def getTH1FfromTGraphAsymmErrors( asym, name='asym' ) :
 
     outH = ROOT.TH1F( name, name, len(xSpacing)-1, xSpacing )
     for bin in range( 1, outH.GetNbinsX()+1 ) :
-        outH.SetBinContent( bin, yVals[bin-1] )
+        # If bin content is zero for data, set it to negative
+        # so that the markers are not plotted in the 0 - max range
+        if yVals[bin-1] == 0 :
+            outH.SetBinContent( bin, -0.000001 )
+        else :
+            outH.SetBinContent( bin, yVals[bin-1] )
+        #outH.SetBinContent( bin, yVals[bin-1] )
         outH.SetBinError( bin, yErrors[bin-1] )
     return outH
 
