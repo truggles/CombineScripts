@@ -1,0 +1,11 @@
+
+new :
+/afs/cern.ch/work/t/truggles/Z_to_tautau/finalSM-HTT_CH/CMSSW_7_4_7/src/CombineHarvester/ZH2016/output/Blinded20170607_cv2cf2_v1
+
+old :
+/afs/cern.ch/work/t/truggles/Z_to_tautau/finalSM-HTT_CH/CMSSW_7_4_7/src/CombineHarvester/HTTSM2016/output/tmp/Blinded20170607_cv2cf2_v1/cmb/125/
+
+old way to run:
+python ../../../../scripts/plotMultiDimFit.py higgsCombineCvCf.MultiDimFit.mH125.root --sm-exp X
+
+

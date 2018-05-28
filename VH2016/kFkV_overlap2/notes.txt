@@ -1,0 +1,9 @@
+
+
+Final comparison made here:
+/afs/cern.ch/work/t/truggles/HIG_CMB_2016/CMSSW_8_1_0/src/CombineHarvester/ZH2016/output/april26_nominal_hig-16-043_keep_ggHHww/april27_CvCf
+
+HIG-16-043 only with NNLOPS: /afs/cern.ch/work/t/truggles/HIG_CMB_2016/CMSSW_8_1_0/src/CombineHarvester/ZH2016/output/april26_nominal_hig-16-043_keep_ggHHww/cmb/125/april27_kFkV_oldPH
+
+Added ggH_hww as signal this time, this also used NNLOPS reweighted DCs.
+
