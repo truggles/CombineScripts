@@ -3,3 +3,8 @@ PubCom says to change the coloring of the limit plot colors:
 https://twiki.cern.ch/twiki/bin/view/CMS/Internal/FigGuidelines#Convention_for_Brazilian_flag_pl
 
 Did this after the fact in the .C files
+
+
+For doing the signal injected, I simply used "-t -1 --expectSignal=1" per recommendation on HN and Andrew G.
+
+

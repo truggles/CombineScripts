@@ -522,4 +522,5 @@ tex->SetNDC();
    lim_obs_cmb->cd();
    lim_obs_cmb->SetSelected(lim_obs_cmb);
    lim_obs_cmb->SaveAs("lim_obs_cmb.pdf");
+   lim_obs_cmb->SaveAs("lim_obs_cmb.png");
 }
