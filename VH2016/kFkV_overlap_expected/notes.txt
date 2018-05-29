@@ -1,0 +1,6 @@
+
+All fits are based off the workspaces used in "kFkV_overlap2"
+The two saved workspaces here are the "official" ones that should be used in the future.
+
+HIG-16-043 updated exp: /afs/cern.ch/work/t/truggles/Z_to_tautau/finalSM-HTT_CH/CMSSW_7_4_7/src/CombineHarvester/ZH2016/may29x_kFkV_hig-16-043
+ALL updated exp: /afs/cern.ch/work/t/truggles/Z_to_tautau/finalSM-HTT_CH/CMSSW_7_4_7/src/CombineHarvester/ZH2016/may29x_kFkV_CMB
