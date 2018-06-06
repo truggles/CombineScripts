@@ -1,0 +1,5 @@
+
+
+This is roughly the command I used to make the official_plotted_fitDiagnostics.root file
+
+combine -M FitDiagnostics workspace_cmb_125.root --saveShapes --saveWithUncertainties --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --robustFit=1 --rMax=4.0 --rMin=1.0
