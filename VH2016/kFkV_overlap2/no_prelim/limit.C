@@ -2142,7 +2142,7 @@ void limit()
    entry->SetMarkerStyle(34);
    entry->SetMarkerSize(3);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("Graph7","Expected for 125 GeV SM Higgs boson","P");
+   entry=leg->AddEntry("Graph7","Expected for a 125 GeV SM Higgs boson","P");
    entry->SetLineColor(1);
    entry->SetLineStyle(1);
    entry->SetLineWidth(1);
@@ -2157,7 +2157,7 @@ tex->SetNDC();
    tex->SetTextSize(0.06);
    tex->SetLineWidth(2);
    tex->Draw();
-   TLatex *text = new TLatex(0.7,0.96,"35.9 fb^{-1} (13 TeV)");
+   TLatex *text = new TLatex(0.75,0.96,"35.9 fb^{-1} (13 TeV)");
    text->SetNDC();
    text->SetTextSize(0.03);
    text->Draw();
