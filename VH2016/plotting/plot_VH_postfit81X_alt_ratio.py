@@ -46,7 +46,7 @@ if fit == "prefit" :
 if fit == "postfit" :
     prepend = "shapes_fit_s/"
     output_dir = "postfit"
-output_dir = "/afs/cern.ch/user/t/truggles/www/post-fit2/"+output_dir
+output_dir = "/afs/cern.ch/user/t/truggles/www/post-fit2_cwr/"+output_dir
 
 def print_yields( h, name ) :
     err = ROOT.Double(0.)
@@ -56,8 +56,8 @@ def print_yields( h, name ) :
     print "%15s: %.3f \pm %.3f   &" % (name, h.Integral(), err)
 
 def add_lumi():
-    lowX=0.58
-    lowY=0.835
+    lowX=0.67
+    lowY=0.82
     lumi  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.30, lowY+0.16, "NDC")
     lumi.SetBorderSize(   0 )
     lumi.SetFillStyle(    0 )
@@ -503,6 +503,11 @@ Poisson.SetLineColor(1)
 Poisson.SetMarkerSize(1)
 Poisson.GetXaxis().SetLabelSize(0)
 
+# Remove the horizontal error bars
+for p in range( 0, Poisson.GetN() ) :
+    Poisson.SetPointEXhigh(p, 0.)
+    Poisson.SetPointEXlow(p, 0.)
+
 # Poisson errors are large, make max 10 or greater
 #WH.SetMaximum( 
 VH.SetMaximum( 
@@ -564,12 +569,12 @@ l1=add_lumi()
 l1.Draw("same")
 l2=add_CMS()
 l2.Draw("same")
-l3=add_Preliminary()
-l3.Draw("same")
+#l3=add_Preliminary()
+#l3.Draw("same")
 
 pad1.RedrawAxis()
 
-categ  = ROOT.TPaveText(0.21, 0.45+0.013, 0.38, 0.70+0.155, "NDC")
+categ  = ROOT.TPaveText(0.21, 0.5+0.013, 0.38, 0.75+0.155, "NDC")
 categ.SetBorderSize(   0 )
 categ.SetFillStyle(    0 )
 categ.SetTextAlign(   12 )
@@ -665,6 +670,11 @@ for iii in range (0,hwoE.GetSize()-2):
     hp.SetPoint(iii,p_x[iii],p_y[iii]/max(hwoE.GetBinContent(iii+1),1e-5))
     hp.SetPointEYlow(iii,hp.GetErrorYlow(iii)/max(hwoE.GetBinContent(iii+1),1e-5))
   hp.SetPointEYhigh(iii,hp.GetErrorYhigh(iii)/max(hwoE.GetBinContent(iii+1),1e-5))
+  # Remove the horizontal error bars
+  hp.SetPointEXhigh(iii, 0.)
+  hp.SetPointEXlow(iii, 0.)
+
+
 h1.SetStats(0)
 #h1.Divide(hwoE)
 #h3.Divide(hwoE)
@@ -761,12 +771,32 @@ else : # is ZH
             h3.GetXaxis().ChangeLabel(j,45,-1,-1,-1,-1,"%s" % ((j-10)*20))
 
 h3.Draw("e2")
+x_val = array('d', [])
+y_val = array('d', [])
+y_error = array('d', [])
+x_error = array('d', [])
+for b in range( 0, h1.GetXaxis().GetNbins() + 1 ) :
+    x_val.append( h1.GetBinCenter( b ) )
+    y_val.append( h1.GetBinContent( b ) )
+    y_error.append( h1.GetBinError( b ) )
+    x_error.append( 0.0 )
+ratio_points = ROOT.TGraphAsymmErrors( len(x_val), x_val, y_val, x_error, x_error, y_error, y_error )
+#ratio_points.SetMarkerColor( ROOT.kRed )
+#ratio_points.SetLineColor( ROOT.kRed )
+ratio_points.SetLineWidth( 1 )
+ratio_points.SetMarkerStyle(20)
+ratio_points.SetLineColor(1)
+ratio_points.SetMarkerSize(1)
+
+    
 
 # Get signal for ratio plot if not default
 if ratio != "default" :
     signal.Draw("histsame")
     #h1.SetMarkerSize(0)
-    h1.Draw("E0 E1 same")
+    print "H1 type:",h1
+    #h1.Draw("E0 E1 same")
+    ratio_points.Draw("P 0 same")
 else :
     hp.Draw("P 0")
 
@@ -786,7 +816,8 @@ if ratio != "default" :
 
 if ratio != "default" :
     #h1.SetMarkerSize(0)
-    h1.Draw("E0 E1 same")
+    #h1.Draw("E0 E1 same")
+    ratio_points.Draw("P 0 same")
 else :
     hp.Draw("P 0 same")
 
@@ -797,7 +828,9 @@ ROOT.gPad.RedrawAxis()
 
 c.Modified()
 app = "" if ratio == "default" else "_modRatio"
-c.SaveAs(output_dir+"/"+fs+"_"+fit+app+".png")
+#c.SaveAs(output_dir+"/"+fs+"_"+fit+app+".root")
+#c.SaveAs(output_dir+"/"+fs+"_"+fit+app+".C")
 c.SaveAs(output_dir+"/"+fs+"_"+fit+app+".pdf")
+c.SaveAs(output_dir+"/"+fs+"_"+fit+app+".png")
 
 

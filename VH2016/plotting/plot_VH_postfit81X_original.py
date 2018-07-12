@@ -39,7 +39,7 @@ if fit == "prefit" :
 if fit == "postfit" :
     prepend = "shapes_fit_s/"
     output_dir = "postfit"
-output_dir = "/afs/cern.ch/user/t/truggles/www/post-fit/"+output_dir
+output_dir = "/afs/cern.ch/user/t/truggles/www/post-fit_supp_cwr/"+output_dir
 
 def print_yields( h, name ) :
     err = ROOT.Double(0.)
@@ -49,8 +49,8 @@ def print_yields( h, name ) :
     print "%15s: %.3f \pm %.3f   &" % (name, h.Integral(), err)
 
 def add_lumi():
-    lowX=0.58
-    lowY=0.835
+    lowX=0.67
+    lowY=0.82
     lumi  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.30, lowY+0.16, "NDC")
     lumi.SetBorderSize(   0 )
     lumi.SetFillStyle(    0 )
@@ -84,7 +84,7 @@ def add_Preliminary():
     lumi.SetFillStyle(    0 )
     lumi.SetTextAlign(   12 )
     lumi.SetTextColor(    1 )
-    lumi.AddText("Preliminary")
+    lumi.AddText("Supplementary")
     return lumi
 
 def make_legend():
@@ -481,6 +481,12 @@ Poisson.SetLineColor(1)
 Poisson.SetMarkerSize(1)
 Poisson.GetXaxis().SetLabelSize(0)
 
+# Remove the horizontal error bars
+x, y = ROOT.Double(0.), ROOT.Double(0.)
+for p in range( 0, Poisson.GetN() ) :
+    Poisson.SetPointEXhigh(p, 0.)
+    Poisson.SetPointEXlow(p, 0.)
+
 # Poisson errors are large, make max 10 or greater
 #WH.SetMaximum( 
 VH.SetMaximum( 
@@ -542,16 +548,20 @@ l1=add_lumi()
 l1.Draw("same")
 l2=add_CMS()
 l2.Draw("same")
-l3=add_Preliminary()
-l3.Draw("same")
+#l3=add_Preliminary()
+#l3.Draw("same")
 
 pad1.RedrawAxis()
 
-categ  = ROOT.TPaveText(0.21, 0.45+0.013, 0.38, 0.70+0.155, "NDC")
+if 'combined' not in cat_text :
+    categ  = ROOT.TPaveText(0.21, 0.5+0.013, 0.38, 0.75+0.155, "NDC")
+    categ.SetTextSize ( 0.07 )
+else :
+    categ  = ROOT.TPaveText(0.21, 0.5+0.013, 0.38, 0.75+0.155, "NDC")
+    categ.SetTextSize ( 0.05 )
 categ.SetBorderSize(   0 )
 categ.SetFillStyle(    0 )
 categ.SetTextAlign(   12 )
-categ.SetTextSize ( 0.05 )
 categ.SetTextColor(    1 )
 categ.SetTextFont (   42 )
 categ.AddText( cat_text )
@@ -725,7 +735,9 @@ pad1.Draw()
 ROOT.gPad.RedrawAxis()
 
 c.Modified()
-c.SaveAs(output_dir+"/"+fs+"_"+fit+".png")
+#c.SaveAs(output_dir+"/"+fs+"_"+fit+".C")
+#c.SaveAs(output_dir+"/"+fs+"_"+fit+".root")
 c.SaveAs(output_dir+"/"+fs+"_"+fit+".pdf")
+c.SaveAs(output_dir+"/"+fs+"_"+fit+".png")
 
 
