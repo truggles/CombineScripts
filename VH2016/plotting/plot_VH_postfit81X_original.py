@@ -39,7 +39,7 @@ if fit == "prefit" :
 if fit == "postfit" :
     prepend = "shapes_fit_s/"
     output_dir = "postfit"
-output_dir = "/afs/cern.ch/user/t/truggles/www/post-fit_supp_cwr/"+output_dir
+output_dir = "/afs/cern.ch/user/t/truggles/www/vh_plots_aug16/"+output_dir
 
 def print_yields( h, name ) :
     err = ROOT.Double(0.)
@@ -133,7 +133,8 @@ if fs=="ett":
   set_max = 12
 if fs=="mtt":
   channels=["ch12"]
-  cat_text = "#mu#tau_{h}#tau_{h}"
+  #cat_text = "#mu#tau_{h}#tau_{h}"
+  cat_text = "#mu#tau#lower[0.8]{#scale[0.7]{h}}#tau#lower[0.8]{#scale[0.7]{h}}"
   set_max = 16
 if fs=="eeem":
   channels=["ch1"]
@@ -406,7 +407,7 @@ print_yields( ZZ, 'ZZ' )
 if channels[0] in wh_channels :
   #print "WZ: %.2f" % WZ.Integral()
   print_yields( WZ, 'WZ' )
-print_yields( Rare, 'Rare' )
+print_yields( Rare, 'Other' )
 print_yields( Fake, 'Fake' )
 print_yields( WH, 'WH' )
 print_yields( ZH, 'ZH' )
@@ -533,7 +534,7 @@ legende.AddEntry(Data,"Observed","elp")
 if channels[0] in wh_channels :
   legende.AddEntry(WZ,"WZ#rightarrow 3l#nu","f")
 legende.AddEntry(ZZ,"ZZ#rightarrow 4l","f")
-legende.AddEntry(Rare,"Rare","f")
+legende.AddEntry(Rare,"Other","f")
 legende.AddEntry(Fake,"Reducible","f")
 legende.AddEntry(VHfill,"VH, H#rightarrow#tau#tau (#mu=2.5)","f")
 #legende.AddEntry(WH,"WH, H#rightarrow#tau#tau (#mu=2.5)","l")

@@ -46,7 +46,7 @@ if fit == "prefit" :
 if fit == "postfit" :
     prepend = "shapes_fit_s/"
     output_dir = "postfit"
-output_dir = "/afs/cern.ch/user/t/truggles/www/post-fit2_cwr/"+output_dir
+output_dir = "/afs/cern.ch/user/t/truggles/www/vh_plots_aug16/"+output_dir
 
 def print_yields( h, name ) :
     err = ROOT.Double(0.)
@@ -424,7 +424,7 @@ print_yields( ZZ, 'ZZ' )
 if channels[0] in wh_channels :
   #print "WZ: %.2f" % WZ.Integral()
   print_yields( WZ, 'WZ' )
-print_yields( Rare, 'Rare' )
+print_yields( Rare, 'Other' )
 print_yields( Fake, 'Fake' )
 print_yields( WH, 'WH' )
 print_yields( ZH, 'ZH' )
@@ -554,7 +554,7 @@ legende.AddEntry(Data,"Observed","elp")
 if channels[0] in wh_channels :
   legende.AddEntry(WZ,"WZ#rightarrow 3l#nu","f")
 legende.AddEntry(ZZ,"ZZ#rightarrow 4l","f")
-legende.AddEntry(Rare,"Rare","f")
+legende.AddEntry(Rare,"Other","f")
 legende.AddEntry(Fake,"Reducible","f")
 legende.AddEntry(VHfill,"VH, H#rightarrow#tau#tau (#mu=2.5)","f")
 #legende.AddEntry(WH,"WH, H#rightarrow#tau#tau (#mu=2.5)","l")
@@ -792,6 +792,7 @@ ratio_points.SetMarkerSize(1)
 
 # Get signal for ratio plot if not default
 if ratio != "default" :
+    print "signal:",signal.GetBinContent(-1),signal.GetBinContent(0), signal.GetBinContent(1)
     signal.Draw("histsame")
     #h1.SetMarkerSize(0)
     print "H1 type:",h1
@@ -821,6 +822,7 @@ if ratio != "default" :
 else :
     hp.Draw("P 0 same")
 
+ROOT.gPad.RedrawAxis()
 c.cd()
 pad1.Draw()
 
