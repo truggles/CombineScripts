@@ -1,0 +1,11 @@
+
+
+# From 74X adding mcAutoStats
+/afs/cern.ch/work/t/truggles/Z_to_tautau/newCombine81X/CMSSW_8_1_0/src/CombineHarvester/ZH2016/output/Blinded20180822_20GeV_proposed_noBBB
+
+
+combine -M FitDiagnostics workspace_cmb_300.root --saveShapes --saveWithUncertainties --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --robustFit=1 -t -1 --expectSignal=0 --rMin=-5
+
+
+
+combine -M FitDiagnostics workspace_cmb_300.root --saveShapes --saveWithUncertainties --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --robustFit=1 -t -1 --expectSignal=1 --rMin=-5
