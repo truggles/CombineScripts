@@ -1,0 +1,1 @@
+MSSM models from: https://twiki.cern.ch/twiki/bin/view/LHCPhysics/LHCHXSWGMSSMNeutral
