@@ -2,8 +2,20 @@ import ROOT
 import json
 from array import array
 from collections import OrderedDict
+import helpers
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
+
+def setLegStyle( x1,y1,x2,y2 ) :
+    leg = ROOT.TLegend(x1,y1,x2,y2)
+    leg.SetBorderSize(0)
+    leg.SetLineColor(1)
+    leg.SetLineStyle(1)
+    leg.SetLineWidth(1)
+    leg.SetFillColor(0)
+    leg.SetFillStyle(1001)
+    leg.SetTextFont(42)
+    return leg
 
 # Didn't work
 #def set_color_gradient( th2 ) :
@@ -62,16 +74,14 @@ def new_pad( name = 'p' ) :
 
 def slim_hist( h ) :
     h.GetXaxis().SetRangeUser( 220, 400 )
-    h.GetYaxis().SetRangeUser( 1.0, 5 )
+    h.GetYaxis().SetRangeUser( 1.0, 6.0 )
     h.GetXaxis().SetTitle( 'm_{A} (GeV)' )
     h.GetYaxis().SetTitle( 'tan(#beta)' )
     h.GetZaxis().SetTitleOffset( 2 )
     
-def get_limit_from_json( json_name, use_obs = False ) :
+def get_limit_from_json( json_name, target = "exp0" ) :
     with open( json_name ) as jsonFile :
         jsonDict = json.load( jsonFile )
-
-    target = "exp0" if not use_obs else "obs"
 
     d1 = {}
     for mass in jsonDict :
@@ -148,7 +158,8 @@ for model_name in model_info.keys() :
 
     xs_times_br = xs_gg_A.Clone()
     #xs_times_br.SetTitle( 'm_{A}-tan(#beta) Limits for '+model_name)
-    xs_times_br.SetTitle(model_name)
+    #xs_times_br.SetTitle(model_name)
+    xs_times_br.SetTitle( "" )
     xs_times_br.Multiply( br_A_Zh )
     xs_times_br.Multiply( br_h_tautau )
     br_Z_LL = 0.03363 + 0.03366 + 0.03370 # ee + mumu + tautau, PDG
@@ -159,21 +170,70 @@ for model_name in model_info.keys() :
     p.Update()
     #c.SaveAs( save_base+'tmp4.png' )
 
-    limit_dict = get_limit_from_json( 'cmb_limits.json' )
+    exp_lim_dictionaries = OrderedDict()
+    exp_lim_dictionaries['exp0'] = get_limit_from_json( 'cmb_limits_1611OBS.json', 'exp0' )
+    exp_lim_dictionaries['exp+1'] = get_limit_from_json( 'cmb_limits_1611OBS.json', 'exp+1' )
+    exp_lim_dictionaries['exp+2'] = get_limit_from_json( 'cmb_limits_1611OBS.json', 'exp+2' )
+    exp_lim_dictionaries['exp-1'] = get_limit_from_json( 'cmb_limits_1611OBS.json', 'exp-1' )
+    exp_lim_dictionaries['exp-2'] = get_limit_from_json( 'cmb_limits_1611OBS.json', 'exp-2' )
+    obs_limit = get_limit_from_json( 'cmb_limits_1611OBS.json', 'obs' )
 
     # Check if there are intersections
     masses = array('d', [])
-    limits_y_val = array('d', [])
-    for mass, limit in limit_dict.iteritems() :
+    obs_limits_y_vals = array('d', [])
+    exp_limits_y_vals = OrderedDict()
+    for mass, limit in obs_limit.iteritems() :
+        masses.append( mass )
         # Just take first for now, we will look into multiple crossing later
         y_vals = check_for_intersections( xs_times_br, mass, limit )
-        masses.append( mass )
-        limits_y_val.append( y_vals[-1] )
+        obs_limits_y_vals.append( y_vals[-1] )
+    for name, dictionary in exp_lim_dictionaries.iteritems() :
+        exp_limits_y_vals[ name ] = array('d', [])
+        for mass, limit in dictionary.iteritems() :
+            # Just take first for now, we will look into multiple crossing later
+            y_vals = check_for_intersections( xs_times_br, mass, limit )
+            exp_limits_y_vals[ name ].append( y_vals[-1] )
 
-    g = ROOT.TGraph( len(masses), masses, limits_y_val )
-    g.SetLineWidth( 4 )
-    g.Draw( 'same' )
+    leg = setLegStyle( .5, .68, .78, .88 )
 
+    obs_g = ROOT.TGraph( len(masses), masses, obs_limits_y_vals )
+    obs_g.SetLineWidth( 4 )
+    obs_g.Draw( 'same' )
+    leg.AddEntry(obs_g, "Observed","lp")
+
+    exp_graphs = OrderedDict()
+    for name, lim in exp_limits_y_vals.iteritems() :
+        g = ROOT.TGraph( len(masses), masses, lim )
+        g.SetTitle( name )
+        g.SetName( name )
+        g.SetLineWidth( 4 )
+        g.SetLineStyle( 7 )
+
+        # Set +/- 1 and +/- 2 bands to different colors
+        if '1' in name : g.SetLineColor( ROOT.kBlue )
+        elif '2' in name : g.SetLineColor( ROOT.kRed )
+
+        # Only need to add a single instance of the +/- 1 and +/- 2 bands
+        if name == 'exp0' : leg.AddEntry(g, "Expected","lp")
+        elif name == 'exp+1' : leg.AddEntry(g, "#pm 1 std. dev.","lp")
+        elif name == 'exp+2' : leg.AddEntry(g, "#pm 2 std. dev.","lp")
+        exp_graphs[ name ] = g
+        #g.Draw( "same" )
+
+    for name, g in exp_graphs.iteritems() :
+        g.Draw( "same" )
+
+    leg.Draw("same")
+    c.Update()
+
+    lumi = helpers.add_lumi()
+    lumi.Draw("same")
+    cms = helpers.add_CMS()
+    cms.Draw("same")
+    prelim = helpers.add_Preliminary()
+    prelim.Draw("same")
+    scenario = helpers.add_Scenario( model_name )
+    scenario.Draw("same")
 
     c.SaveAs( save_base+model_name.replace(' ','_').replace('(#beta)','Beta')+'.png' )
     c.SaveAs( save_base+model_name.replace(' ','_').replace('(#beta)','Beta')+'.pdf' )
