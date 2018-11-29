@@ -32,7 +32,7 @@ def setLegStyle( x1,y1,x2,y2 ) :
 #    print ROOT.TColor.CreateGradientColorTable( 3, Length, Red, Green, Blue, nb )
 #    ROOT.gStyle.SetNumberContours(nb)
     
-def check_for_intersections( h2, mass, limit ) :
+def check_for_intersections( h2, mass, limit, SF ) :
     mass_bin = h2.GetXaxis().FindBin( mass )
     to_save = []
     previous_tuple = []
@@ -41,20 +41,21 @@ def check_for_intersections( h2, mass, limit ) :
     for y_bin in range( 1, h2.GetYaxis().GetNbins()+1 ) :
         y_bin_val = h2.GetYaxis().GetBinCenter( y_bin )
         bin_content = h2.GetBinContent( mass_bin, y_bin )
+        sf_val = SF.GetBinContent( mass_bin, y_bin )
         # Initialize first one
         if previous_tuple == [] :
             previous_tuple = [ y_bin, y_bin_val, bin_content ] 
             current_tuple = [ y_bin, y_bin_val, bin_content ] 
         previous_tuple = list( current_tuple )
         current_tuple = [ y_bin, y_bin_val, bin_content ] 
-        if bin_content >= limit and limit > previous_tuple[2] :
+        if bin_content >= (limit / sf_val) and (limit / sf_val) > previous_tuple[2] :
             #print ' - intersection', limit
             #print ' --- current',current_tuple
             #print ' --- previous',previous_tuple
             to_save.append( y_bin_val )
             count += 1
             
-        if bin_content <= limit and limit < previous_tuple[2]  : 
+        if bin_content <= (limit / sf_val) and (limit / sf_val) < previous_tuple[2]  : 
             #print ' - intersection', limit
             #print ' --- current',current_tuple
             #print ' --- previous',previous_tuple
@@ -111,16 +112,16 @@ def get_limit_from_json( json_name, target = "exp0" ) :
 from ROOT import gStyle
 #ROOT.gStyle.SetPalette( 57, array('i', [i for i in range( 1, 251)]) ) # 57 == kBird
 
-save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Nov27v3/'
+save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Nov27v4/'
 
 model_info = {
     #'mH Mod Plus scenario' : 'mhmodp_mu200_13TeV.root',
     #'mH Mod Minus scenario' : 'mhmodm_13TeV.root',
+    'MSSM low tan(#beta) scenario' : 'low-tb-high_13TeV.root',
     'hMSSM scenario' : 'hMSSM_13TeV.root',
     #'Light Stop Mod scenario' : 'lightstopmod_13TeV.root',
     #'New mH Max scenario' : 'newmhmax_mu200_13TeV.root',
     #'Light Stau scenario' : 'lightstau1_13TeV.root',
-    #XXX 'MSSM low tan(#beta) scenario' : 'low-tb-high_13TeV.root',
     ###'Low TanBeta scenario' : 'low-tb-high_8TeV.root',
     #'tauphobic scenario' : 'tauphobic_13TeV.root',
 }
@@ -186,7 +187,7 @@ for model_name in model_info.keys() :
     # otherwise it is scaled to 1.0 for all bins
     scale_factor = xs_gg_A.Clone()
     if add_bbA :
-        bbA_eff = 0.75 # measured relative bbA efficiency / ggA eff, by Jaana
+        bbA_eff = 0.76 # measured relative bbA efficiency / ggA eff, by Jaana
         bbA_mod = xs_bb5F_A.Clone()
         bbA_mod.Scale( bbA_eff )
         scale_factor.Add( bbA_mod )
@@ -199,7 +200,7 @@ for model_name in model_info.keys() :
     p2.cd()
     scale_factor2 = scale_factor.Clone()
     scale_factor2.GetXaxis().SetRangeUser( 280, 300 )
-    scale_factor2.GetYaxis().SetRangeUser( 3, 7 )
+    scale_factor2.GetYaxis().SetRangeUser( 3, 6 )
     scale_factor2.Draw('COLZ TEXT')
     ROOT.gPad.Update()
     c2.SaveAs( save_base+mod_name_short+'_limit_scaling_factor_for_ggA_vs_bbA.png' )
@@ -238,6 +239,7 @@ for model_name in model_info.keys() :
     p.Update()
     c.SaveAs( save_base+mod_name_short+'_plotted_bkg.png' )
 
+    # FIXME, delete this
     xs_times_br_inc_eff.SetTitle( "" )
     xs_times_br_inc_eff.Multiply( br_A_Zh )
     xs_times_br_inc_eff.Multiply( br_h_tautau )
@@ -259,13 +261,13 @@ for model_name in model_info.keys() :
     for mass, limit in obs_limit.iteritems() :
         masses.append( mass )
         # Just take first for now, we will look into multiple crossing later
-        y_vals = check_for_intersections( xs_times_br_inc_eff, mass, limit )
+        y_vals = check_for_intersections( xs_times_br_plot, mass, limit, scale_factor )
         obs_limits_y_vals.append( y_vals[-1] )
     for name, dictionary in exp_lim_dictionaries.iteritems() :
         exp_limits_y_vals[ name ] = array('d', [])
         for mass, limit in dictionary.iteritems() :
             # Just take first for now, we will look into multiple crossing later
-            y_vals = check_for_intersections( xs_times_br_inc_eff, mass, limit )
+            y_vals = check_for_intersections( xs_times_br_plot, mass, limit, scale_factor )
             exp_limits_y_vals[ name ].append( y_vals[-1] )
 
     leg = setLegStyle( .5, .68, .78, .88 )
@@ -309,7 +311,9 @@ for model_name in model_info.keys() :
     scenario = helpers.add_Scenario( model_name )
     scenario.Draw("same")
 
-    print "Bkg value at mA 300, Tan(b) 4 = %f" % xs_times_br_plot.GetBinContent( xs_times_br_plot.FindBin( 300, 4 ) )
+    xs_times_br_plot.GetZaxis().SetRangeUser( 0.01, 100 )
+
+    #print "Bkg value at mA 300, Tan(b) 4 = %f" % xs_times_br_plot.GetBinContent( xs_times_br_plot.FindBin( 300, 4 ) )
 
     c.SaveAs( save_base+model_name.replace(' ','_').replace('(#beta)','Beta')+app+'.png' )
     c.SaveAs( save_base+model_name.replace(' ','_').replace('(#beta)','Beta')+app+'.pdf' )

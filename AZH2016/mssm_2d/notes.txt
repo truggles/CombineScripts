@@ -1,1 +1,4 @@
 MSSM models from: https://twiki.cern.ch/twiki/bin/view/LHCPhysics/LHCHXSWGMSSMNeutral
+
+for better Z palette, use lxplus7.cern.ch and
+source /cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.12.04/x86_64-centos7-gcc48-opt/root/bin/thisroot.sh
