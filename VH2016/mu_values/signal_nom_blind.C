@@ -325,4 +325,5 @@ tex->SetNDC();
    signal_nom_blind->Modified();
    signal_nom_blind->cd();
    signal_nom_blind->SetSelected(signal_nom_blind);
+   signal_nom_blind->SaveAs("signal_nom_blind.pdf");
 }
