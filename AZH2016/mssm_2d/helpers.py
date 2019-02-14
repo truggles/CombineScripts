@@ -37,6 +37,7 @@ def add_Preliminary():
     prelim.SetTextAlign(   12 )
     prelim.SetTextColor(    1 )
     prelim.AddText("Preliminary")
+    #prelim.AddText("Supplementary")
     return prelim
 
 def add_Scenario( text ):

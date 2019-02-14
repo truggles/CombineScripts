@@ -7,7 +7,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
 add_bbA = True
-add_bbA = False
+#add_bbA = False
 app = '' if not add_bbA else '_with_bbA'
 
 def setLegStyle( x1,y1,x2,y2 ) :
@@ -112,7 +112,7 @@ def get_limit_from_json( json_name, target = "exp0" ) :
 from ROOT import gStyle
 #ROOT.gStyle.SetPalette( 57, array('i', [i for i in range( 1, 251)]) ) # 57 == kBird
 
-save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Nov27v4/'
+save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Feb14v2/'
 
 model_info = {
     #'mH Mod Plus scenario' : 'mhmodp_mu200_13TeV.root',
@@ -270,11 +270,12 @@ for model_name in model_info.keys() :
             y_vals = check_for_intersections( xs_times_br_plot, mass, limit, scale_factor )
             exp_limits_y_vals[ name ].append( y_vals[-1] )
 
-    leg = setLegStyle( .5, .68, .78, .88 )
+    leg = setLegStyle( .48, .67, .78, .88 )
 
     obs_g = ROOT.TGraph( len(masses), masses, obs_limits_y_vals )
     obs_g.SetLineWidth( 4 )
     obs_g.Draw( 'same' )
+    leg.SetHeader("          95% CL limit")
     leg.AddEntry(obs_g, "Observed","lp")
 
     exp_graphs = OrderedDict()
@@ -306,8 +307,8 @@ for model_name in model_info.keys() :
     lumi.Draw("same")
     cms = helpers.add_CMS()
     cms.Draw("same")
-    prelim = helpers.add_Preliminary()
-    prelim.Draw("same")
+    #prelim = helpers.add_Preliminary()
+    #prelim.Draw("same")
     scenario = helpers.add_Scenario( model_name )
     scenario.Draw("same")
 
