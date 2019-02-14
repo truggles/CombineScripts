@@ -112,7 +112,14 @@ def get_limit_from_json( json_name, target = "exp0" ) :
 from ROOT import gStyle
 #ROOT.gStyle.SetPalette( 57, array('i', [i for i in range( 1, 251)]) ) # 57 == kBird
 
-save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Feb14v2/'
+
+uncert = '_pdfasDown'
+uncert = '_pdfasUp'
+uncert = '_scaleDown'
+uncert = '_scaleUp'
+uncert = ''
+
+save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Feb14v3'+uncert+'/'
 
 model_info = {
     #'mH Mod Plus scenario' : 'mhmodp_mu200_13TeV.root',
@@ -135,7 +142,7 @@ for model_name in model_info.keys() :
     mod_name_short = str(model_info[ model_name ]).replace('.root','')
 
     # Start with the ggA cross section
-    xs_gg_A = model_file.Get( 'xs_gg_A' )
+    xs_gg_A = model_file.Get( 'xs_gg_A'+uncert )
     slim_hist( xs_gg_A )
     xs_gg_A.GetZaxis().SetTitle( '#sigma ggA (fb)' )
     xs_gg_A.Draw('COLZ')
@@ -150,7 +157,7 @@ for model_name in model_info.keys() :
     #c.SaveAs( save_base+mod_name_short+'_xs_bb4F_A.png' )
 
     # Next bbA cross section
-    xs_bb5F_A = model_file.Get( 'xs_bb5F_A' )
+    xs_bb5F_A = model_file.Get( 'xs_bb5F_A'+uncert )
     slim_hist( xs_bb5F_A )
     xs_bb5F_A.GetZaxis().SetTitle( '#sigma bb5FA (fb)' )
     xs_bb5F_A.Draw('COLZ')
