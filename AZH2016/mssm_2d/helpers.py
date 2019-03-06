@@ -27,8 +27,8 @@ def add_CMS():
     return cms
 
 def add_Preliminary():
-    lowX=0.15
-    lowY=0.66
+    lowX=0.24
+    lowY=0.82
     prelim  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.15, lowY+0.16, "NDC")
     prelim.SetTextFont(52)
     prelim.SetTextSize(0.05)
@@ -41,8 +41,6 @@ def add_Preliminary():
     return prelim
 
 def add_Scenario():
-    lowX=0.20
-    lowY=0.73
     scenario  = ROOT.TLatex()
     scenario.SetTextFont(42)
     scenario.SetTextSize(0.05)

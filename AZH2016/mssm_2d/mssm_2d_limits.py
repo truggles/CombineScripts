@@ -7,7 +7,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
 add_bbA = True
-add_bbA = False
+#add_bbA = False
 app = '' if not add_bbA else '_with_bbA'
 
 def setLegStyle( x1,y1,x2,y2 ) :
@@ -123,6 +123,8 @@ uncert = '_scaleDown'
 uncert = '_scaleUp'
 uncert = ''
 
+save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Mar06v1_sup'+uncert+'/'
+save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Mar06v1_prelim'+uncert+'/'
 save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Mar06v1'+uncert+'/'
 
 model_info = {
@@ -281,12 +283,12 @@ for model_name in model_info.keys() :
             y_vals = check_for_intersections( xs_times_br_plot, mass, limit, scale_factor )
             exp_limits_y_vals[ name ].append( y_vals[-1] )
 
-    leg = setLegStyle( .47, .67, .83, .89 )
+    leg = setLegStyle( .47, .67, .8, .88 )
 
     obs_g = ROOT.TGraph( len(masses), masses, obs_limits_y_vals )
     obs_g.SetLineWidth( 4 )
     obs_g.Draw( 'same' )
-    leg.SetHeader("          95% CL upper limits")
+    leg.SetHeader("95% CL upper limits")
     leg.AddEntry(obs_g, "Observed","lp")
 
     exp_graphs = OrderedDict()
