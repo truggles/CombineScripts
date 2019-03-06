@@ -7,7 +7,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
 add_bbA = True
-#add_bbA = False
+add_bbA = False
 app = '' if not add_bbA else '_with_bbA'
 
 def setLegStyle( x1,y1,x2,y2 ) :
@@ -73,7 +73,7 @@ def new_pad( name = 'p' ) :
     p = ROOT.TPad( name, name, 0, 0, 1, 1)
     p.Draw()
     p.cd()
-    p.SetRightMargin( 2 * p.GetRightMargin() )
+    p.SetRightMargin( 1.6 * p.GetRightMargin() )
     return p
 
 def slim_hist( h ) :
@@ -82,8 +82,12 @@ def slim_hist( h ) :
     h.GetYaxis().SetRangeUser( 1.0, 6.0 )
     #h.GetYaxis().SetRangeUser( 2.0, 4.0 )
     h.GetXaxis().SetTitle( 'm_{A} (GeV)' )
+    h.GetXaxis().SetTitleSize( h.GetXaxis().GetTitleSize()*1.3 )
     h.GetYaxis().SetTitle( 'tan(#beta)' )
-    h.GetZaxis().SetTitleOffset( 2 )
+    h.GetYaxis().SetTitleOffset( .85 )
+    h.GetYaxis().SetTitleSize( h.GetYaxis().GetTitleSize()*1.3 )
+    h.GetZaxis().SetTitleOffset( .85 )
+    h.GetZaxis().SetTitleSize( h.GetZaxis().GetTitleSize()*1.3 )
     
 def get_limit_from_json( json_name, target = "exp0" ) :
     with open( json_name ) as jsonFile :
@@ -119,7 +123,7 @@ uncert = '_scaleDown'
 uncert = '_scaleUp'
 uncert = ''
 
-save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Feb14v3'+uncert+'/'
+save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Mar06v1'+uncert+'/'
 
 model_info = {
     #'mH Mod Plus scenario' : 'mhmodp_mu200_13TeV.root',
@@ -223,13 +227,13 @@ for model_name in model_info.keys() :
     # Not sure why renaming the Z axis isn't working once cloned
     # so doing it here
     if add_bbA :
-        xs_gg_A.GetZaxis().SetTitle( '#sigma(ggA+bbA)*BR(A#rightarrowZh #rightarrow LL#tau#tau) (fb)' )
+        xs_gg_A.GetZaxis().SetTitle( '#sigma(ggA+bbA) #bf{#it{#Beta}} (A#rightarrow Zh #rightarrow ll#tau#tau) (fb)' )
         xs_times_br_plot = xs_gg_A.Clone()
         xs_times_br_plot.Add( xs_bb5F_A )
         xs_times_br_inc_eff = xs_gg_A.Clone()
         xs_times_br_inc_eff.Add( xs_bb5F_A )
     else : # only do ggA
-        xs_gg_A.GetZaxis().SetTitle( '#sigma(ggA)*BR(A#rightarrowZh #rightarrow LL#tau#tau) (fb)' )
+        xs_gg_A.GetZaxis().SetTitle( '#sigma(ggA) #bf{#it{#Beta}} (A#rightarrow Zh #rightarrow ll#tau#tau) (fb)' )
         xs_times_br_plot = xs_gg_A.Clone()
         xs_times_br_inc_eff = xs_gg_A.Clone()
 
@@ -277,12 +281,12 @@ for model_name in model_info.keys() :
             y_vals = check_for_intersections( xs_times_br_plot, mass, limit, scale_factor )
             exp_limits_y_vals[ name ].append( y_vals[-1] )
 
-    leg = setLegStyle( .48, .67, .78, .88 )
+    leg = setLegStyle( .47, .67, .83, .89 )
 
     obs_g = ROOT.TGraph( len(masses), masses, obs_limits_y_vals )
     obs_g.SetLineWidth( 4 )
     obs_g.Draw( 'same' )
-    leg.SetHeader("          95% CL limit")
+    leg.SetHeader("          95% CL upper limits")
     leg.AddEntry(obs_g, "Observed","lp")
 
     exp_graphs = OrderedDict()
@@ -298,9 +302,9 @@ for model_name in model_info.keys() :
         elif '2' in name : g.SetLineColor( ROOT.kRed )
 
         # Only need to add a single instance of the +/- 1 and +/- 2 bands
-        if name == 'exp0' : leg.AddEntry(g, "Expected","lp")
-        elif name == 'exp+1' : leg.AddEntry(g, "#pm 1 std. dev.","lp")
-        elif name == 'exp+2' : leg.AddEntry(g, "#pm 2 std. dev.","lp")
+        if name == 'exp0' : leg.AddEntry(g, "Median expected","lp")
+        elif name == 'exp+1' : leg.AddEntry(g, "68% expected","lp")
+        elif name == 'exp+2' : leg.AddEntry(g, "95% expected","lp")
         exp_graphs[ name ] = g
         #g.Draw( "same" )
 
@@ -316,8 +320,8 @@ for model_name in model_info.keys() :
     cms.Draw("same")
     #prelim = helpers.add_Preliminary()
     #prelim.Draw("same")
-    scenario = helpers.add_Scenario( model_name )
-    scenario.Draw("same")
+    scenario = helpers.add_Scenario()
+    scenario.DrawLatexNDC( .14, .8, model_name.replace(' scenario','') )
 
     xs_times_br_plot.GetZaxis().SetRangeUser( 0.01, 100 )
 

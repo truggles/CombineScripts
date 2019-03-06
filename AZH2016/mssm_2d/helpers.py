@@ -14,8 +14,8 @@ def add_lumi():
     return lumi
 
 def add_CMS():
-    lowX=0.15
-    lowY=0.73
+    lowX=0.13
+    lowY=0.82
     cms  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.15, lowY+0.16, "NDC")
     cms.SetTextFont(61)
     cms.SetTextSize(0.06)
@@ -40,14 +40,10 @@ def add_Preliminary():
     #prelim.AddText("Supplementary")
     return prelim
 
-def add_Scenario( text ):
-    lowX=0.25
-    lowY=0.82
-    scenario  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.15, lowY+0.16, "NDC")
+def add_Scenario():
+    lowX=0.20
+    lowY=0.73
+    scenario  = ROOT.TLatex()
     scenario.SetTextFont(42)
     scenario.SetTextSize(0.05)
-    scenario.SetBorderSize(   0 )
-    scenario.SetFillStyle(    0 )
-    scenario.SetTextColor(    1 )
-    scenario.AddText( text )
     return scenario
