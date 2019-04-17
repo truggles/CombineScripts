@@ -7,7 +7,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
 add_bbA = True
-#add_bbA = False
+add_bbA = False
 app = '' if not add_bbA else '_with_bbA'
 
 def setLegStyle( x1,y1,x2,y2 ) :
@@ -83,7 +83,7 @@ def slim_hist( h ) :
     #h.GetYaxis().SetRangeUser( 2.0, 4.0 )
     h.GetXaxis().SetTitle( 'm_{A} (GeV)' )
     h.GetXaxis().SetTitleSize( h.GetXaxis().GetTitleSize()*1.3 )
-    h.GetYaxis().SetTitle( 'tan(#beta)' )
+    h.GetYaxis().SetTitle( 'tan#beta' )
     h.GetYaxis().SetTitleOffset( .85 )
     h.GetYaxis().SetTitleSize( h.GetYaxis().GetTitleSize()*1.3 )
     h.GetZaxis().SetTitleOffset( .85 )
@@ -123,14 +123,14 @@ uncert = '_scaleDown'
 uncert = '_scaleUp'
 uncert = ''
 
-save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Mar06v1_sup'+uncert+'/'
-save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Mar06v1_prelim'+uncert+'/'
-save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Mar06v1'+uncert+'/'
+save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Mar12v1_sup'+uncert+'/'
+#save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Mar12v1_prelim'+uncert+'/'
+#save_base = '/afs/cern.ch/user/t/truggles/www/azh_mssm_2d/Mar12v1'+uncert+'/'
 
 model_info = {
     #'mH Mod Plus scenario' : 'mhmodp_mu200_13TeV.root',
     #'mH Mod Minus scenario' : 'mhmodm_13TeV.root',
-    'MSSM low tan(#beta) scenario' : 'low-tb-high_13TeV.root',
+    'MSSM Low tan#beta scenario' : 'low-tb-high_13TeV.root',
     'hMSSM scenario' : 'hMSSM_13TeV.root',
     #'Light Stop Mod scenario' : 'lightstopmod_13TeV.root',
     #'New mH Max scenario' : 'newmhmax_mu200_13TeV.root',
@@ -320,8 +320,8 @@ for model_name in model_info.keys() :
     lumi.Draw("same")
     cms = helpers.add_CMS()
     cms.Draw("same")
-    #prelim = helpers.add_Preliminary()
-    #prelim.Draw("same")
+    prelim = helpers.add_Preliminary()
+    prelim.Draw("same")
     scenario = helpers.add_Scenario()
     scenario.DrawLatexNDC( .14, .8, model_name.replace(' scenario','') )
 
